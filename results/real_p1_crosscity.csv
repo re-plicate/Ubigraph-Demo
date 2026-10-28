@@ -1,0 +1,9 @@
+﻿target_city,fewshot_days,mae_spaces,transfer_gain_pct
+SFpark,0,20.5,-0.5
+SFpark,1,18.09,-61.1
+SFpark,3,15.13,-34.7
+SFpark,7,12.82,-14.2
+London,0,22.0,-0.5
+London,1,19.31,-71.9
+London,3,15.99,-42.4
+London,7,13.42,-19.5

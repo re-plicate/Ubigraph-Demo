@@ -1,0 +1,6 @@
+﻿config,agents_active,calls,ok,latency_ms,est_mae_spaces,note
+Full system (7 agents),6,6,6,245.7,11.23,MAE estimated from component contribution
+Only TemporalAgent,1,1,1,46.8,13.73,MAE estimated from component contribution
+No DroneAgent,5,5,5,144.4,12.030000000000001,MAE estimated from component contribution
+No TransferAgent,5,5,4,76.9,11.73,MAE estimated from component contribution
+No HICAgent,5,5,4,173.4,11.530000000000001,MAE estimated from component contribution

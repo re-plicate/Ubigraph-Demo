@@ -1,0 +1,7 @@
+﻿section,method,mae,vs_groc_pct,description
+H,DosCond (ICLR'24),11.85,5.53,分布匹配，无梯度步
+H,SFGC (ICLR'24),11.6,3.3,谱特征压缩
+H,MOCo (NeurIPS'24),11.55,2.86,动量对比压缩
+H,DiffuGC (2025),11.45,1.97,扩散模型生成合成图
+H,LLM-GC (2026),11.38,1.34,LLM引导语义特征压缩
+H,GroC (ours),11.23,0.0,梯度匹配+局部扰动+热力融合(最优)

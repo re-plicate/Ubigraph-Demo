@@ -1,0 +1,11 @@
+﻿method,mae,std,rmse,status,delta_vs_groc_pct,note
+Full oracle (100% data),9.64,0.0,0.0,已训,-14.2,metrics_across_seeds.csv
+"GroC (ours, 12h)",11.23,0.0,0.0,已训,0.0,metrics_across_seeds.csv
+"GroC (6h, no perturbation=GCond-like)",11.67,0.0,0.0,已训,3.9,metrics_across_seeds.csv
+Random condensation,11.67,0.0,0.0,已训,3.9,metrics_across_seeds.csv
+Persistence,14.48,0.0,0.0,基线,28.9,metrics_across_seeds.csv
+DosCond (ICLR'24),,,,需单独实现,,分布匹配，无梯度步
+SFGC (ICLR'24),,,,需单独实现,,谱特征压缩
+MOCo (NeurIPS'24),,,,需单独实现,,动量对比压缩
+DiffuGC (2025),,,,需单独实现diffusion,,扩散模型生成合成图
+LLM-GC (2026),,,,需LLM接口,,LLM引导语义压缩

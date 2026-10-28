@@ -1,0 +1,6 @@
+﻿method,mae_spaces,note
+Persistence,105.89,last value
+"ARIMA(2,1,2)",118.85,"per garage, 5s"
+Seasonal Naive,70.4,same hour prev day
+LSTM-2layer,164.69,"univariate, 30 epochs, 784s"
+STGCN-simplified,,"multivariate GCN+GRU, 0s"

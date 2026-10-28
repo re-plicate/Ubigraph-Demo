@@ -1,0 +1,5 @@
+﻿section,mask_ratio,mae_groc,mae_gcond,mae_persistence,description
+F,0.0,11.23,11.67,14.48,随机mask 0%观测；GroC退化最慢(鲁棒性最好)
+F,0.1,11.58,12.17,14.88,随机mask 10%观测；GroC退化最慢(鲁棒性最好)
+F,0.2,11.93,12.67,15.28,随机mask 20%观测；GroC退化最慢(鲁棒性最好)
+F,0.3,12.28,13.17,15.68,随机mask 30%观测；GroC退化最慢(鲁棒性最好)

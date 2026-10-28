@@ -1,0 +1,6 @@
+﻿method,mae,std,rmse,n_labels,source
+"Full (oracle, 100% data)",9.64,1.13,20.26,9748,metrics_across_seeds.csv
+"GroC (ours, 12h window)",11.23,0.11,23.91,9748,metrics_across_seeds.csv
+Random condensation,11.67,0.53,24.25,9748,metrics_across_seeds.csv
+GCond (gradient matching),11.67,0.46,24.18,9748,metrics_across_seeds.csv
+Persistence,14.4,0.0,31.49,9820,metrics_across_seeds.csv

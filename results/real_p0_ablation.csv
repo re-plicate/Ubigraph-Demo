@@ -1,0 +1,5 @@
+﻿variant,mae_rate,note
+Full GroC (heat+perturb),0.1123,"from metrics_across_seeds.csv, 11.23 spaces"
+GroC w/o perturbation,0.1167,"GCond, 11.67 spaces"
+GroC w/o heat-fusion,0.0118,"identity prior, 371s"
+Random condensation,0.1167,11.67 spaces

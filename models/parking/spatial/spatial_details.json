@@ -1,0 +1,8 @@
+{
+  "mode": "geographic_adaptation",
+  "uses_target_parking_labels": false,
+  "theta": 0.5,
+  "lambda": 1.0,
+  "T0_identity_interpretation": true,
+  "weighted_mass_convention": "sum of directed weights"
+}

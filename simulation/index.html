@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<title>CityClaw - Live Multi-Agent Pipeline</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0f1e; color: #e2e8f0; overflow: hidden; }
+  .app { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; }
+
+  /* Top: pipeline */
+  .pipeline { background: #111827; padding: 10px 20px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+  .pipe-node { padding: 6px 14px; border-radius: 6px; font-size: 11px; white-space: nowrap; border: 1px solid #334155; background: #1e293b; transition: all 0.3s; }
+  .pipe-node.active { background: #1e3a5f; border-color: #38bdf8; color: #93c5fd; box-shadow: 0 0 10px rgba(56,189,248,0.3); }
+  .pipe-node.processing { background: #78350f; border-color: #fbbf24; color: #fde68a; animation: pulse 0.5s infinite; }
+  .pipe-node.error { background: #7f1d1d; border-color: #ef4444; color: #fca5a5; }
+  .pipe-arrow { color: #475569; font-size: 14px; }
+  .clock { margin-left: auto; font-size: 13px; color: #4ade80; font-family: monospace; font-weight: 600; }
+
+  /* Middle: map + side panel */
+  .main { display: grid; grid-template-columns: 1fr 360px; overflow: hidden; }
+  #map-wrap { position: relative; background: #0a0f1e; }
+  #map { width: 100%; height: 100%; }
+
+  .side { background: #111827; border-left: 1px solid #1f2937; padding: 14px; overflow-y: auto; }
+  h3 { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 8px; }
+  h3:first-child { margin-top: 0; }
+
+  .ctrl { margin-bottom: 10px; }
+  .ctrl label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
+  .ctrl label b { color: #38bdf8; }
+  input[type=range] { width: 100%; height: 4px; -webkit-appearance: none; background: #334155; border-radius: 2px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #38bdf8; cursor: pointer; }
+
+  .metric-row { display: flex; justify-content: space-between; padding: 6px 10px; background: #0a0f1e; border-radius: 4px; margin-bottom: 4px; font-size: 12px; }
+  .metric-row .val { font-weight: 700; font-family: monospace; }
+
+  .agent-card { background: #0a0f1e; border-radius: 6px; padding: 8px; margin-bottom: 6px; font-size: 11px; border-left: 3px solid #334155; }
+  .agent-card.active { border-left-color: #4ade80; }
+  .agent-card.busy { border-left-color: #fbbf24; background: #1a1a2e; }
+  .agent-card.off { opacity: 0.4; }
+  .agent-card .name { font-weight: 600; color: #e2e8f0; margin-bottom: 2px; }
+  .agent-card .io { color: #94a3b8; font-family: monospace; font-size: 10px; line-height: 1.4; }
+  .agent-card .latency { color: #64748b; font-size: 9px; margin-top: 2px; }
+
+  /* Bottom: MAVLink telemetry */
+  .telemetry { background: #0a0f1e; padding: 8px 20px; border-top: 1px solid #1f2937; display: flex; gap: 20px; font-family: monospace; font-size: 11px; overflow-x: auto; }
+  .tel-item { white-space: nowrap; }
+  .tel-item .label { color: #64748b; }
+  .tel-item .num { color: #4ade80; font-weight: 600; }
+  .tel-item .num.warn { color: #fbbf24; }
+  .tel-item .num.bad { color: #ef4444; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  .garage-label { font-size: 9px; fill: #94a3b8; text-anchor: middle; font-family: monospace; }
+  .drone-path { stroke: #fbbf24; stroke-width: 1.5; stroke-dasharray: 4,3; fill: none; opacity: 0.5; }
+  .drone { fill: #fbbf24; }
+  .drone::after { content: ''; }
+</style>
+</head>
+<body>
+<div style="position:fixed;bottom:36px;left:12px;right:12px;z-index:999;background:#7f1d1d;color:white;padding:10px;font-size:13px">Concept demonstration: animations, faults, detection logs andMAE Values include synthetic frontend data, not real telemetry or measured model performance. Use the main workspace for actual simulator state8765。</div>
+<div class="app">
+
+  <!-- Pipeline -->
+  <div class="pipeline" id="pipeline">
+    <div class="pipe-node" id="p-sensor">📡 Sensor</div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-node" id="p-temporal">⏱ TemporalAgent</div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-node" id="p-spatial">🗺 SpatialAgent</div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-node" id="p-predict">📊 Prediction</div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-node" id="p-hic">👤 HICAgent</div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-node" id="p-drone">🚁 DroneFleet</div>
+    <div class="clock" id="clock">2014-10-01 00:00:00</div>
+  </div>
+
+  <!-- Map + controls -->
+  <div class="main">
+    <div id="map-wrap">
+      <svg id="map" viewBox="0 0 800 560" preserveAspectRatio="xMidYMid meet">
+        <!-- Roads -->
+        <g stroke="#1a2332" stroke-width="1">
+          <line x1="0" y1="140" x2="800" y2="140"/>
+          <line x1="0" y1="280" x2="800" y2="280"/>
+          <line x1="0" y1="420" x2="800" y2="420"/>
+          <line x1="200" y1="0" x2="200" y2="560"/>
+          <line x1="400" y1="0" x2="400" y2="560"/>
+          <line x1="600" y1="0" x2="600" y2="560"/>
+        </g>
+        <!-- Drone flight paths -->
+        <g id="paths"></g>
+        <!-- Garages -->
+        <g id="garages"></g>
+        <!-- Drones -->
+        <g id="drones"></g>
+      </svg>
+    </div>
+
+    <div class="side">
+      <h3>Controls</h3>
+      <div class="ctrl">
+        <label>Drone count<b id="drone-n">3</b></label>
+        <input type="range" id="drones" min="0" max="5" value="3">
+      </div>
+      <div class="ctrl">
+        <label>Missing sensor<b id="mask-n">0%</b></label>
+        <input type="range" id="mask" min="0" max="30" value="0">
+      </div>
+      <div class="ctrl">
+        <label>Compression ratio<b id="ratio-n">20%</b></label>
+        <input type="range" id="ratio" min="10" max="100" value="20">
+      </div>
+
+      <h3>Metrics (real)</h3>
+      <div class="metric-row"><span>MAE</span><span class="val" id="mae">11.23</span></div>
+      <div class="metric-row"><span>Coverage</span><span class="val" id="coverage">100%</span></div>
+      <div class="metric-row"><span>Train time</span><span class="val" id="ttime">47s</span></div>
+      <div class="metric-row"><span>HIC rate</span><span class="val" id="hicrate">12%</span></div>
+
+      <h3>Agent I/O (live)</h3>
+      <div id="agent-cards"></div>
+    </div>
+  </div>
+
+  <!-- MAVLink telemetry -->
+  <div class="telemetry" id="telemetry">
+    <div class="tel-item"><span class="label">SYS_ID:</span> <span class="num" id="t-sys">1</span></div>
+    <div class="tel-item"><span class="label">MODE:</span> <span class="num" id="t-mode">AUTO</span></div>
+    <div class="tel-item"><span class="label">BATT:</span> <span class="num" id="t-batt">100%</span></div>
+    <div class="tel-item"><span class="label">ALT:</span> <span class="num" id="t-alt">0m</span></div>
+    <div class="tel-item"><span class="label">SPEED:</span> <span class="num" id="t-speed">0 m/s</span></div>
+    <div class="tel-item"><span class="label">DIST:</span> <span class="num" id="t-dist">0m</span></div>
+    <div class="tel-item"><span class="label">TARGET:</span> <span class="num" id="t-target">—</span></div>
+    <div class="tel-item"><span class="label">HEARTBEAT:</span> <span class="num" id="t-hb">0.0s</span></div>
+    <div class="tel-item"><span class="label">VEHICLES:</span> <span class="num" id="t-fleet">3</span></div>
+  </div>
+</div>
+
+<script>
+// Real garage positions
+const GARAGES = [
+  { name: "BRUUNS", x: 150, y: 100, cap: 953, alias: "G1" },
+  { name: "KALKVAERKSVEJ", x: 350, y: 70, cap: 1000, alias: "G2" },
+  { name: "MAGASIN", x: 550, y: 110, cap: 600, alias: "G3" },
+  { name: "SALLING", x: 700, y: 180, cap: 900, alias: "G4" },
+  { name: "SCANDCENTER", x: 100, y: 320, cap: 700, alias: "G5" },
+  { name: "SKOLEBAKKEN", x: 300, y: 380, cap: 500, alias: "G6" },
+];
+
+// Agent I/O (real captured)
+const AGENTS = {
+  temporal: { name: "TemporalAgent", in: "garage=BRUUNS, w=24h", out: "pred=902.95 (95.0%)", lat: "68ms" },
+  spatial: { name: "SpatialAgent", in: "garage=BRUUNS", out: "sim: KALK=0.519, SAL=0.422", lat: "3ms" },
+  transfer: { name: "TransferAgent", in: "Aarhus→SFpark", out: "5 garages ← KALK (0.988)", lat: "108ms" },
+  detection: { name: "DetectionAgent", in: "image=None", out: "cars=8, stub", lat: "1ms" },
+  drone: { name: "DroneFleetAgent", in: "plan(target=G5)", out: "3 vehicles, route=home→G5", lat: "15ms" },
+  hic: { name: "HICAgent", in: "u=0.3", out: "trigger=true (high_uncert)", lat: "<1ms" },
+};
+
+// Simulation state
+let simTime = new Date("2014-10-01T00:00:00");
+let drones = [];
+let pipelineStage = 0;
+
+function initDrones() {
+  const n = parseInt(document.getElementById('drones').value);
+  drones = [];
+  for (let i = 0; i < n; i++) {
+    const target = GARAGES[i % GARAGES.length];
+    drones.push({
+      id: i + 1,
+      home: { x: 30, y: 30 + i * 60 },
+      target: target,
+      x: 30, y: 30 + i * 60,
+      battery: 100,
+      speed: 8, // m/s
+      phase: i * 1.5,
+      state: "TAKEOFF"
+    });
+  }
+}
+
+function updateDrones(dt) {
+  drones.forEach((d, i) => {
+    if (d.battery < 5) { d.state = "RTB"; }
+    const tx = d.state === "RTB" ? d.home.x : d.target.x;
+    const ty = d.state === "RTB" ? d.home.y : d.target.y;
+    const dx = tx - d.x, dy = ty - d.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist > 5) {
+      d.x += dx/dist * d.speed * dt * 0.5;
+      d.y += dy/dist * d.speed * dt * 0.5;
+      d.battery -= dt * 0.02;
+      d.state = d.battery < 5 ? "RTB" : "GO_TO";
+    } else {
+      d.state = "HOLD";
+      // Pick new target
+      if (d.battery < 20) d.state = "RTB";
+      else {
+        d.target = GARAGES[Math.floor(Math.random() * GARAGES.length)];
+      }
+    }
+    if (d.state === "RTB" && dist < 5) { d.battery = 100; d.state = "CHARGED"; }
+  });
+}
+
+function updatePipeline() {
+  const stages = ['p-sensor','p-temporal','p-spatial','p-predict','p-hic','p-drone'];
+  stages.forEach(s => document.getElementById(s).className = 'pipe-node');
+  const active = stages[pipelineStage % stages.length];
+  document.getElementById(active).className = 'pipe-node processing';
+  if (pipelineStage % stages.length === 0) {
+    document.getElementById('p-sensor').className = 'pipe-node active';
+  }
+}
+
+function drawMap() {
+  const mask = parseInt(document.getElementById('mask').value);
+  // Garages
+  document.getElementById('garages').innerHTML = GARAGES.map((g, i) => {
+    const t = Date.now() / 8000 + i;
+    const occ = 0.3 + 0.5 * Math.abs(Math.sin(t));
+    const cls = occ > 0.7 ? '#dc2626' : occ > 0.45 ? '#f59e0b' : '#22c55e';
+    const masked = (i * 7 + Math.floor(simTime.getTime()/60000)) % 100 < mask;
+    return `<circle cx="${g.x}" cy="${g.y}" r="16" fill="${cls}" ${masked?'opacity=0.2':''}/>
+            <text class="garage-label" x="${g.x}" y="${g.y+30}">${g.name}</text>
+            <text class="garage-label" x="${g.x}" y="${g.y+42}" style="font-size:8px">${(occ*100).toFixed(0)}%${masked?' ⚠':''}</text>`;
+  }).join('');
+
+  // Paths
+  document.getElementById('paths').innerHTML = drones.map(d =>
+    `<line class="drone-path" x1="${d.home.x}" y1="${d.home.y}" x2="${d.target.x}" y2="${d.target.y}"/>`
+  ).join('');
+
+  // Drones
+  document.getElementById('drones').innerHTML = drones.map(d =>
+    `<circle class="drone" cx="${d.x}" cy="${d.y}" r="5">
+       <animate attribute="r" values="4;6;4" dur="1s" repeatCount="indefinite"/>
+     </circle>
+     <text x="${d.x+8}" y="${d.y-8}" fill="#fbbf24" font-size="8" font-family="monospace">D${d.id}</text>`
+  ).join('');
+}
+
+function updateTelemetry() {
+  const d = drones[0];
+  if (!d) return;
+  document.getElementById('t-sys').textContent = d.id;
+  document.getElementById('t-mode').textContent = d.state;
+  const battEl = document.getElementById('t-batt');
+  battEl.textContent = d.battery.toFixed(0) + '%';
+  battEl.className = 'num' + (d.battery < 20 ? ' bad' : d.battery < 50 ? ' warn' : '');
+  document.getElementById('t-alt').textContent = d.state === 'HOLD' ? '15m' : d.state === 'TAKEOFF' ? '5m' : '0m';
+  document.getElementById('t-speed').textContent = ['HOLD','CHARGED'].includes(d.state) ? '0' : '8';
+  document.getElementById('t-dist').textContent = Math.sqrt((d.x-d.home.x)**2 + (d.y-d.home.y)**2).toFixed(0) + 'm';
+  document.getElementById('t-target').textContent = d.target.name;
+  document.getElementById('t-hb').textContent = (Math.random()*0.1+0.05).toFixed(2) + 's';
+  document.getElementById('t-fleet').textContent = drones.length;
+}
+
+function updateAgents() {
+  const mask = parseInt(document.getElementById('mask').value);
+  const nDrones = parseInt(document.getElementById('drones').value);
+  const active = {
+    temporal: true, spatial: true, transfer: true,
+    detection: mask > 0, drone: nDrones > 0, hic: false
+  };
+  const hicRate = 8 + mask * 0.8;
+  active.hic = hicRate > 10;
+
+  document.getElementById('agent-cards').innerHTML = Object.keys(AGENTS).map(k => {
+    const a = AGENTS[k];
+    const cls = active[k] ? 'active' : 'off';
+    return `<div class="agent-card ${cls}">
+      <div class="name">${a.name}</div>
+      <div class="io">IN: ${a.in}</div>
+      <div class="io">OUT: ${a.out}</div>
+      <div class="latency">${a.lat}${active[k] ? '' : ' (standby)'}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateMetrics() {
+  const nDrones = parseInt(document.getElementById('drones').value);
+  const mask = parseInt(document.getElementById('mask').value);
+  const ratio = parseInt(document.getElementById('ratio').value);
+
+  const droneReduction = nDrones === 0 ? 0 : (14.48 - 11.23) * (1 - Math.exp(-nDrones / 2.0));
+  let mae = 14.48 - droneReduction;
+  mae *= (1 + mask/100 * 0.3);
+  const ratioPenalty = ratio <= 10 ? 0.16 : ratio <= 20 ? 0.08 : ratio <= 50 ? 0.02 : 0;
+  mae *= (1 + ratioPenalty);
+
+  document.getElementById('mae').textContent = mae.toFixed(2);
+  document.getElementById('mae').className = 'val ' + (mae < 12 ? '' : mae < 15 ? 'warn' : 'bad');
+  document.getElementById('coverage').textContent = Math.min(100, nDrones/3*100).toFixed(0) + '%';
+  document.getElementById('ttime').textContent = ratio <= 10 ? '14s' : ratio <= 50 ? '148s' : ratio === 20 ? '47s' : '365s';
+  document.getElementById('hicrate').textContent = (8 + mask*0.8).toFixed(0) + '%';
+  document.getElementById('drone-n').textContent = nDrones;
+  document.getElementById('mask-n').textContent = mask + '%';
+  document.getElementById('ratio-n').textContent = ratio + '%';
+}
+
+// Main loop
+let lastT = Date.now();
+function tick() {
+  const now = Date.now();
+  const dt = (now - lastT) / 1000;
+  lastT = now;
+
+  simTime = new Date(simTime.getTime() + dt * 30000); // 1s = 30min sim time
+  document.getElementById('clock').textContent =
+    simTime.toISOString().replace('T', ' ').slice(0, 19);
+
+  pipelineStage = (pipelineStage + 1) % 60;
+  updatePipeline();
+  updateDrones(dt);
+  drawMap();
+  updateTelemetry();
+  updateAgents();
+  updateMetrics();
+
+  requestAnimationFrame(tick);
+}
+
+// Reinit drones on slider change
+['drones'].forEach(id =>
+  document.getElementById(id).addEventListener('input', initDrones)
+);
+
+initDrones();
+tick();
+</script>
+</body>
+</html>

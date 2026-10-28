@@ -1,0 +1,60 @@
+{
+  "primary": {
+    "protocol": "full_history",
+    "method": "groc",
+    "mode": "attention",
+    "variant": "main_12h",
+    "history_points": 24,
+    "neighbors": 8,
+    "model_role": "primary",
+    "mae_spaces_mean": 11.22899051345575,
+    "mae_spaces_std": 0.107608462583899,
+    "rmse_spaces_mean": 23.905702361055067,
+    "rmse_spaces_std": 0.2091833981718416,
+    "macro_nmae_mean": 0.0154050162061818,
+    "macro_nmae_std": 0.0001114191614444,
+    "test_labels_per_seed": 9748
+  },
+  "random_seeds": [
+    7,
+    17,
+    27
+  ],
+  "validation_labels": 3318,
+  "full_history_test_labels_per_seed": 9748,
+  "fewshot_test_labels_per_seed": 9820,
+  "history_input_availability": "computed from historical observations only",
+  "train_labels_before": "2014-09-01 00:00:00",
+  "validation_labels_before": "2014-10-01 00:00:00",
+  "evaluation_layouts": {
+    "data/evaluation/validation.npz": "9bea2c521d8eabab3f79c6ca87a377c017ee5c149680abb980a3493da32eb69c",
+    "data/evaluation/test.npz": "9b168d94e7ff45337a4f7b23663fe4ed2f1d3819d28146e8a4dfa7ca190d2067"
+  },
+  "data_hashes": {
+    "data/raw/aarhus_parking.csv": "d563c70b165541fdd4f50ffefd8ada994d043f93bc63a7a1f27b1dfab257e794",
+    "data/raw/aarhus_parking_address.csv": "55bd3adf838d9edc5a9c0f4146935751cc72ff1611d458ea1a19c5865d26bc43"
+  },
+  "checkpoint_hashes": {
+    "models/parking/seed_17/all/models/groc_attention.pt": "b05e95e30d6f2203beb12b2904bf3a158950b0b860163745bee3660fc15947a0",
+    "models/parking/seed_17/without_BRUUNS/models/groc_attention.pt": "d19a3d8042d25af9f307d50a6c4c319834dc8357d39d954abfb2a05cc9511b72",
+    "models/parking/seed_17/without_KALKVAERKSVEJ/models/groc_attention.pt": "fbc75f9303c5aa2b08f744bc0c6c8d85045289976ddea70309f5dcd248ff2dc1",
+    "models/parking/seed_17/without_MAGASIN/models/groc_attention.pt": "0500123b2d4ff23d9be5bb585a8a764673c227138b9acdbec09061a47e17f620",
+    "models/parking/seed_17/without_SALLING/models/groc_attention.pt": "2662174435d3742572dcee48625dbb3986af58ab84a9b76324445a073b6c3868",
+    "models/parking/seed_17/without_SCANDCENTER/models/groc_attention.pt": "7445f927e7d454bf45a5e9f37a3b6eec424bc4a28c9ded9b2b0e8a556b1346ea",
+    "models/parking/seed_17/without_SKOLEBAKKEN/models/groc_attention.pt": "21a9390d95bf61b6396dd92e4de6011fd5381acf83fe31f9405bed2e01cd549d",
+    "models/parking/seed_27/all/models/groc_attention.pt": "e47ab133ea106735e6cf18ef0a986b2db53ca3711054dfe6bfce258d8e1fcbbf",
+    "models/parking/seed_27/without_BRUUNS/models/groc_attention.pt": "eef4579e11bbb71547eb846fe1d9552d12be2ef75507dacae91aa3c764c272dd",
+    "models/parking/seed_27/without_KALKVAERKSVEJ/models/groc_attention.pt": "0b4bad1055b8b5b026f83ec7ed155d8da685d86b4e1ee1d56ef751796796c374",
+    "models/parking/seed_27/without_MAGASIN/models/groc_attention.pt": "c57dbf93277764ec72ea40f906c63284303566b66c3f8c24b7532b339648913d",
+    "models/parking/seed_27/without_SALLING/models/groc_attention.pt": "52e62c5ab65a9395c127473d8d0973ef23e3c23c1c21d9e897518d1228acb9a5",
+    "models/parking/seed_27/without_SCANDCENTER/models/groc_attention.pt": "0deed2a5e96e50dcfbaed21e841adb957c19f852e793002153206e9c0bd2ec8a",
+    "models/parking/seed_27/without_SKOLEBAKKEN/models/groc_attention.pt": "1cf8a3d6158b0cb8721510996b8099b6e3b7d00e2adecc1a96a8b8f5da042bbc",
+    "models/parking/seed_7/all/models/groc_attention.pt": "45cb0d0c69997143fdc2947a4d01853fe0eab514745f795f85c64b013d39ce27",
+    "models/parking/seed_7/without_BRUUNS/models/groc_attention.pt": "8d430d22d148ec8f6aa7fe7ce8b652887aaec037a00f343f7a0c2e25fa45de2b",
+    "models/parking/seed_7/without_KALKVAERKSVEJ/models/groc_attention.pt": "67237b7b3ad55c2fb4b71dad559401f6e46cbe9482d4776c0128300f8223c816",
+    "models/parking/seed_7/without_MAGASIN/models/groc_attention.pt": "9f7f4763fe2e9bc7faeab6135a2811a7fced79ef6c70a32514c5ffe6e80f10dd",
+    "models/parking/seed_7/without_SALLING/models/groc_attention.pt": "107042cd5799c16f23dabd7a628702d4a0c7eb50894f40dd6572f5c1b746ccbe",
+    "models/parking/seed_7/without_SCANDCENTER/models/groc_attention.pt": "dc541046507f18eeea99c91fa9039b695abcf7bf60552e8a517c87ee02bcf1b2",
+    "models/parking/seed_7/without_SKOLEBAKKEN/models/groc_attention.pt": "4b6b53a7b056e52c6b768056ea729477abfc82e363bd8c11ec7e26c77adf938f"
+  }
+}

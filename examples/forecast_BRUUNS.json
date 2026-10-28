@@ -1,0 +1,406 @@
+{
+  "garage": "BRUUNS",
+  "as_of": "2014-09-30 23:30:00",
+  "prediction_time": "2014-10-01 00:00:00",
+  "predicted_available": 902.9488594532013,
+  "predicted_available_rate": 0.9474804401397705,
+  "capacity": 953.0,
+  "protocol": "full_history",
+  "seed": 7,
+  "method": "V3 synchronized groc + CoSimHeat spatial feature attention",
+  "current_input_status": {
+    "BRUUNS": "available",
+    "KALKVAERKSVEJ": "available",
+    "MAGASIN": "available",
+    "SALLING": "available",
+    "SCANDCENTER": "available",
+    "SKOLEBAKKEN": "available"
+  },
+  "spatial_attention": {
+    "BRUUNS": 0.25464433431625366,
+    "KALKVAERKSVEJ": 0.1827322542667389,
+    "MAGASIN": 0.13189925253391266,
+    "SALLING": 0.1657164841890335,
+    "SCANDCENTER": 0.1514020711183548,
+    "SKOLEBAKKEN": 0.11360563337802887
+  },
+  "spatial_prior": {
+    "BRUUNS": 1.0,
+    "KALKVAERKSVEJ": 0.518754243850708,
+    "MAGASIN": 0.26845306158065796,
+    "SALLING": 0.4217384457588196,
+    "SCANDCENTER": 0.35297414660453796,
+    "SKOLEBAKKEN": 0.19669869542121887
+  },
+  "temporal_references": {
+    "BRUUNS": [
+      {
+        "template_index": 40,
+        "anchor": "2014-07-03 00:30:00",
+        "outcome_time": "2014-07-03 01:00:00",
+        "weight": 0.16769805550575256,
+        "delta_rate": 0.045178771018981934
+      },
+      {
+        "template_index": 75,
+        "anchor": "2014-08-05 00:30:00",
+        "outcome_time": "2014-08-05 01:00:00",
+        "weight": 0.13263709843158722,
+        "delta_rate": -0.013510465621948242
+      },
+      {
+        "template_index": 46,
+        "anchor": "2014-07-10 00:00:00",
+        "outcome_time": "2014-07-10 00:30:00",
+        "weight": 0.13140462338924408,
+        "delta_rate": 0.00907057523727417
+      },
+      {
+        "template_index": 59,
+        "anchor": "2014-07-21 23:00:00",
+        "outcome_time": "2014-07-21 23:30:00",
+        "weight": 0.13110968470573425,
+        "delta_rate": -0.025140881538391113
+      },
+      {
+        "template_index": 86,
+        "anchor": "2014-08-21 00:30:00",
+        "outcome_time": "2014-08-21 01:00:00",
+        "weight": 0.1278609335422516,
+        "delta_rate": -0.014118432998657227
+      },
+      {
+        "template_index": 50,
+        "anchor": "2014-07-10 23:00:00",
+        "outcome_time": "2014-07-10 23:30:00",
+        "weight": 0.1263912320137024,
+        "delta_rate": 0.022498667240142822
+      },
+      {
+        "template_index": 69,
+        "anchor": "2014-08-02 02:30:00",
+        "outcome_time": "2014-08-02 03:00:00",
+        "weight": 0.09464240074157715,
+        "delta_rate": 0.00144118070602417
+      },
+      {
+        "template_index": 60,
+        "anchor": "2014-07-22 00:30:00",
+        "outcome_time": "2014-07-22 01:00:00",
+        "weight": 0.08825594186782837,
+        "delta_rate": -0.00351637601852417
+      }
+    ],
+    "KALKVAERKSVEJ": [
+      {
+        "template_index": 28,
+        "anchor": "2014-06-23 00:30:00",
+        "outcome_time": "2014-06-23 01:00:00",
+        "weight": 0.1463141292333603,
+        "delta_rate": -0.01465451717376709
+      },
+      {
+        "template_index": 40,
+        "anchor": "2014-07-03 00:30:00",
+        "outcome_time": "2014-07-03 01:00:00",
+        "weight": 0.13559724390506744,
+        "delta_rate": 0.02439814805984497
+      },
+      {
+        "template_index": 12,
+        "anchor": "2014-05-31 01:00:00",
+        "outcome_time": "2014-05-31 01:30:00",
+        "weight": 0.13344082236289978,
+        "delta_rate": -0.013683140277862549
+      },
+      {
+        "template_index": 8,
+        "anchor": "2014-05-26 21:30:00",
+        "outcome_time": "2014-05-26 22:00:00",
+        "weight": 0.1330300122499466,
+        "delta_rate": 0.004381239414215088
+      },
+      {
+        "template_index": 86,
+        "anchor": "2014-08-21 00:30:00",
+        "outcome_time": "2014-08-21 01:00:00",
+        "weight": 0.11712557077407837,
+        "delta_rate": -0.022225618362426758
+      },
+      {
+        "template_index": 50,
+        "anchor": "2014-07-10 23:00:00",
+        "outcome_time": "2014-07-10 23:30:00",
+        "weight": 0.11653923243284225,
+        "delta_rate": 0.0242006778717041
+      },
+      {
+        "template_index": 46,
+        "anchor": "2014-07-10 00:00:00",
+        "outcome_time": "2014-07-10 00:30:00",
+        "weight": 0.11199553310871124,
+        "delta_rate": -0.009493052959442139
+      },
+      {
+        "template_index": 49,
+        "anchor": "2014-07-10 21:30:00",
+        "outcome_time": "2014-07-10 22:00:00",
+        "weight": 0.1059575006365776,
+        "delta_rate": -0.009047091007232666
+      }
+    ],
+    "MAGASIN": [
+      {
+        "template_index": 62,
+        "anchor": "2014-07-23 00:00:00",
+        "outcome_time": "2014-07-23 00:30:00",
+        "weight": 0.17558984458446503,
+        "delta_rate": -0.01611328125
+      },
+      {
+        "template_index": 50,
+        "anchor": "2014-07-10 23:00:00",
+        "outcome_time": "2014-07-10 23:30:00",
+        "weight": 0.15407253801822662,
+        "delta_rate": 0.01746976375579834
+      },
+      {
+        "template_index": 46,
+        "anchor": "2014-07-10 00:00:00",
+        "outcome_time": "2014-07-10 00:30:00",
+        "weight": 0.14154037833213806,
+        "delta_rate": -0.0034401416778564453
+      },
+      {
+        "template_index": 60,
+        "anchor": "2014-07-22 00:30:00",
+        "outcome_time": "2014-07-22 01:00:00",
+        "weight": 0.1161096841096878,
+        "delta_rate": -0.016376793384552002
+      },
+      {
+        "template_index": 59,
+        "anchor": "2014-07-21 23:00:00",
+        "outcome_time": "2014-07-21 23:30:00",
+        "weight": 0.11513279378414154,
+        "delta_rate": -0.013236284255981445
+      },
+      {
+        "template_index": 86,
+        "anchor": "2014-08-21 00:30:00",
+        "outcome_time": "2014-08-21 01:00:00",
+        "weight": 0.11336153000593185,
+        "delta_rate": -0.015148699283599854
+      },
+      {
+        "template_index": 93,
+        "anchor": "2014-08-27 02:30:00",
+        "outcome_time": "2014-08-27 03:00:00",
+        "weight": 0.10325208306312561,
+        "delta_rate": -0.007600247859954834
+      },
+      {
+        "template_index": 78,
+        "anchor": "2014-08-13 01:30:00",
+        "outcome_time": "2014-08-13 02:00:00",
+        "weight": 0.08094111829996109,
+        "delta_rate": 0.012018859386444092
+      }
+    ],
+    "SALLING": [
+      {
+        "template_index": 18,
+        "anchor": "2014-06-03 20:30:00",
+        "outcome_time": "2014-06-03 21:00:00",
+        "weight": 0.1819281131029129,
+        "delta_rate": 0.03658437728881836
+      },
+      {
+        "template_index": 86,
+        "anchor": "2014-08-21 00:30:00",
+        "outcome_time": "2014-08-21 01:00:00",
+        "weight": 0.16622984409332275,
+        "delta_rate": -0.020486414432525635
+      },
+      {
+        "template_index": 8,
+        "anchor": "2014-05-26 21:30:00",
+        "outcome_time": "2014-05-26 22:00:00",
+        "weight": 0.14633694291114807,
+        "delta_rate": 0.007966935634613037
+      },
+      {
+        "template_index": 74,
+        "anchor": "2014-08-04 21:30:00",
+        "outcome_time": "2014-08-04 22:00:00",
+        "weight": 0.10819731652736664,
+        "delta_rate": 0.028143703937530518
+      },
+      {
+        "template_index": 12,
+        "anchor": "2014-05-31 01:00:00",
+        "outcome_time": "2014-05-31 01:30:00",
+        "weight": 0.10334393382072449,
+        "delta_rate": -0.03624933958053589
+      },
+      {
+        "template_index": 40,
+        "anchor": "2014-07-03 00:30:00",
+        "outcome_time": "2014-07-03 01:00:00",
+        "weight": 0.10284475237131119,
+        "delta_rate": 0.007782101631164551
+      },
+      {
+        "template_index": 22,
+        "anchor": "2014-06-20 20:30:00",
+        "outcome_time": "2014-06-20 21:00:00",
+        "weight": 0.0993926003575325,
+        "delta_rate": 0.0216749906539917
+      },
+      {
+        "template_index": 49,
+        "anchor": "2014-07-10 21:30:00",
+        "outcome_time": "2014-07-10 22:00:00",
+        "weight": 0.09172641485929489,
+        "delta_rate": 0.022154033184051514
+      }
+    ],
+    "SCANDCENTER": [
+      {
+        "template_index": 8,
+        "anchor": "2014-05-26 21:30:00",
+        "outcome_time": "2014-05-26 22:00:00",
+        "weight": 0.1695765107870102,
+        "delta_rate": 0.02229166030883789
+      },
+      {
+        "template_index": 86,
+        "anchor": "2014-08-21 00:30:00",
+        "outcome_time": "2014-08-21 01:00:00",
+        "weight": 0.1568729728460312,
+        "delta_rate": -0.011701881885528564
+      },
+      {
+        "template_index": 74,
+        "anchor": "2014-08-04 21:30:00",
+        "outcome_time": "2014-08-04 22:00:00",
+        "weight": 0.14483022689819336,
+        "delta_rate": 0.04604429006576538
+      },
+      {
+        "template_index": 22,
+        "anchor": "2014-06-20 20:30:00",
+        "outcome_time": "2014-06-20 21:00:00",
+        "weight": 0.13464102149009705,
+        "delta_rate": 0.007447779178619385
+      },
+      {
+        "template_index": 75,
+        "anchor": "2014-08-05 00:30:00",
+        "outcome_time": "2014-08-05 01:00:00",
+        "weight": 0.12848247587680817,
+        "delta_rate": -0.016810059547424316
+      },
+      {
+        "template_index": 40,
+        "anchor": "2014-07-03 00:30:00",
+        "outcome_time": "2014-07-03 01:00:00",
+        "weight": 0.09437573701143265,
+        "delta_rate": 0.0082855224609375
+      },
+      {
+        "template_index": 78,
+        "anchor": "2014-08-13 01:30:00",
+        "outcome_time": "2014-08-13 02:00:00",
+        "weight": 0.0898696631193161,
+        "delta_rate": 0.012875914573669434
+      },
+      {
+        "template_index": 49,
+        "anchor": "2014-07-10 21:30:00",
+        "outcome_time": "2014-07-10 22:00:00",
+        "weight": 0.0813513696193695,
+        "delta_rate": -0.004010319709777832
+      }
+    ],
+    "SKOLEBAKKEN": [
+      {
+        "template_index": 62,
+        "anchor": "2014-07-23 00:00:00",
+        "outcome_time": "2014-07-23 00:30:00",
+        "weight": 0.19092144072055817,
+        "delta_rate": -0.021430332213640213
+      },
+      {
+        "template_index": 78,
+        "anchor": "2014-08-13 01:30:00",
+        "outcome_time": "2014-08-13 02:00:00",
+        "weight": 0.16558387875556946,
+        "delta_rate": 0.0
+      },
+      {
+        "template_index": 93,
+        "anchor": "2014-08-27 02:30:00",
+        "outcome_time": "2014-08-27 03:00:00",
+        "weight": 0.13436932861804962,
+        "delta_rate": -0.01575450226664543
+      },
+      {
+        "template_index": 75,
+        "anchor": "2014-08-05 00:30:00",
+        "outcome_time": "2014-08-05 01:00:00",
+        "weight": 0.1166122555732727,
+        "delta_rate": -0.013181247748434544
+      },
+      {
+        "template_index": 86,
+        "anchor": "2014-08-21 00:30:00",
+        "outcome_time": "2014-08-21 01:00:00",
+        "weight": 0.11602579057216644,
+        "delta_rate": -0.007269857916980982
+      },
+      {
+        "template_index": 60,
+        "anchor": "2014-07-22 00:30:00",
+        "outcome_time": "2014-07-22 01:00:00",
+        "weight": 0.11295991390943527,
+        "delta_rate": -0.004679901525378227
+      },
+      {
+        "template_index": 63,
+        "anchor": "2014-07-24 02:00:00",
+        "outcome_time": "2014-07-24 02:30:00",
+        "weight": 0.08979515731334686,
+        "delta_rate": -0.02107097953557968
+      },
+      {
+        "template_index": 94,
+        "anchor": "2014-08-28 03:00:00",
+        "outcome_time": "2014-08-28 03:30:00",
+        "weight": 0.07373227179050446,
+        "delta_rate": -0.010676396079361439
+      }
+    ]
+  },
+  "memory_kind": "groc",
+  "attention_note": "Attention weights describe this computation, not confidence or causal effects",
+  "run_hash": "b5450e9550c9cc9a94d18c91bf9fdd42fccf256607a0d526ab54397656155d9d",
+  "checkpoint": "seed_7/all/models/groc_attention.pt",
+  "provenance": {
+    "source_names": [
+      "BRUUNS",
+      "KALKVAERKSVEJ",
+      "MAGASIN",
+      "SALLING",
+      "SCANDCENTER",
+      "SKOLEBAKKEN"
+    ],
+    "source_train_last_label_ns": 1409527800000000000,
+    "source_selection_last_label_ns": 1411740000000000000,
+    "target_label_budget": null,
+    "target": null,
+    "synthetic_kind": "groc",
+    "input_protocol": "full_history",
+    "study": "window_neighbor_study"
+  }
+}

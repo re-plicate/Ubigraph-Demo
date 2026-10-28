@@ -1,0 +1,5 @@
+﻿mask_ratio,mae_persistence_masked,mae_groc_0mask,mae_gcond_0mask,note
+0.0,0.19,11.23,11.67,GroC/GCond masked eval needs model reload; persistence is real
+0.1,0.19,,,GroC/GCond masked eval needs model reload; persistence is real
+0.2,0.2,,,GroC/GCond masked eval needs model reload; persistence is real
+0.3,0.23,,,GroC/GCond masked eval needs model reload; persistence is real

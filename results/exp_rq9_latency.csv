@@ -1,0 +1,4 @@
+﻿section,variant,ms,description
+I,p50 per-inference,55,中位时延
+I,p95 per-inference,104,95分位时延
+I,system (100 concurrent),180,100并发下系统级p95

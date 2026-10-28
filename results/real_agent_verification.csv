@@ -1,0 +1,7 @@
+﻿agent,action,call_ms,ok,keys
+TemporalAgent,predict,9089.0,True,"['garage', 'as_of', 'prediction_time', 'predicted_available', 'predicted_available_rate']"
+SpatialAgent,similarity,0.5,True,"['garage', 'most_similar', 'note']"
+TransferAgent,transfer_predict,128.3,True,"['method', 'predictions']"
+DetectionAgent,detect,1.8,True,"['backend', 'image', 'cars_detected', 'segmented', 'note']"
+DroneFleetAgent,state,16.6,True,"['kind', 'backend', 'scene', 'epoch', 'sim_time']"
+HumanInLoopAgent,evaluate,0.0,True,"['uncertainty', 'risk', 'cost', 'trigger_human', 'reason']"

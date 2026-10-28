@@ -1,0 +1,27 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+.env.local
+.env
+runtime/
+outputs/
+.matplotlib_cache/
+.DS_Store
+.env.openai.local
+
+.venv-macos/
+.env.openai.local
+
+# Local credentials, environments, state and generated exports
+.env.*
+!.env.example
+.venv*/
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+*.log
+*.mp4
+*.zip
+results/agent_io_log.json

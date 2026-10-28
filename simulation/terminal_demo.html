@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<title>CityClaw — Interactive Terminal</title>
+<style>
+  body { font-family: 'Courier New', monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }
+  .terminal { max-width: 900px; margin: 0 auto; background: #161b22; border-radius: 8px; padding: 20px; border: 1px solid #30363d; height: 90vh; display: flex; flex-direction: column; }
+  .header { color: #58a6ff; font-size: 13px; border-bottom: 1px solid #30363d; padding-bottom: 10px; margin-bottom: 10px; }
+  .log { flex: 1; overflow-y: auto; font-size: 13px; line-height: 1.8; }
+  .user { color: #7ee787; margin: 8px 0 2px; }
+  .agent { color: #8b949e; padding-left: 20px; }
+  .agent .name { color: #d2a8ff; font-weight: bold; }
+  .agent .ok { color: #7ee787; }
+  .agent .warn { color: #fbbf24; }
+  .result { background: #0d1117; padding: 8px 12px; border-radius: 4px; margin: 4px 0 4px 20px; border-left: 3px solid #30363d; }
+  .result .mae { color: #7ee787; font-weight: bold; }
+  .result .mae-bad { color: #f85149; }
+  .input-row { display: flex; gap: 8px; margin-top: 10px; border-top: 1px solid #30363d; padding-top: 10px; }
+  input { flex: 1; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; padding: 8px 12px; border-radius: 4px; font-family: inherit; font-size: 13px; }
+  input:focus { outline: none; border-color: #58a6ff; }
+  button { background: #1f6feb; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 13px; }
+  button:hover { background: #388bfd; }
+  .quick { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .quick button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; font-size: 11px; padding: 4px 10px; }
+  .quick button:hover { background: #30363d; }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <div class="header">CityClaw v1.0 — Type your query below. Backend: 127.0.0.1:8766</div>
+  <div class="log" id="log">
+    <div class="agent">CityClaw ready. Agents: Requirement, Spatial, Temporal, Transfer, Drone, Detection, HIC</div>
+    <div class="agent">Try: "BRUUNSHow many spaces in the next 30 minutes" or click a quick query below.</div>
+  </div>
+
+  <div class="quick">
+    <button onclick="quick('BRUUNSHow many spaces in the next 30 minutes')">📊 ForecastBRUUNS</button>
+    <button onclick="quick('KALKVAERKSVEJSensor offline')">🚨 Sensor offline</button>
+    <button onclick="quick('SFparkCan you forecast')">🔄 Cross-city transfer</button>
+    <button onclick="quick('BRUUNSWhich garage is most similar')">🗺 Spatial similarity</button>
+  </div>
+
+  <div class="input-row">
+    <input id="cmd" placeholder="Enter a query; press Enter to send..." onkeydown="if(event.key==='Enter')send()">
+    <button onclick="send()">Send</button>
+  </div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8766";
+const log = document.getElementById('log');
+const cmd = document.getElementById('cmd');
+
+function addUser(text) {
+  log.innerHTML += `<div class="user">You: ${text}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+function addAgent(html) {
+  log.innerHTML += `<div class="agent">${html}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+async function callAPI(path, body) {
+  try {
+    const r = await fetch(API+path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const value = await r.json();
+    if (!r.ok) throw new Error(value.detail || value.error || 'Request failed');
+    return value;
+  } catch(e) {
+    addAgent(`<span class="warn">Backend connection failed: ${e.message}。Confirmuvicorn at8766 port.</span>`);
+    return null;
+  }
+}
+
+async function send() {
+  const text = cmd.value.trim();
+  if (!text) return;
+  cmd.value = '';
+  addUser(text);
+
+  // Step 1: RequirementAgent parses intent
+  addAgent(`<span class="name">RequirementAgent:</span> Parsing intent...`);
+  const reqResult = await callAPI('/api/agents/requirement/call', {
+    action: 'parse',
+    payload: { query: text }
+  });
+
+  if (!reqResult) return;
+
+  const skills = reqResult.decomposed_skills || [];
+  addAgent(`<span class="name">RequirementAgent:</span> Decompose into${skills.length} itemsskill: ${skills.map(s=>s.agent+'.'+s.action).join(', ')}`);
+
+  // Step 2: Execute each skill
+  for (const skill of skills) {
+    addAgent(`<span class="name">${skill.agent}Agent:</span> Run ${skill.action}...`);
+
+    // Build payload based on skill type
+    let payload = {...skill.payload};
+    if (skill.action === 'predict' || skill.action === 'neighbors') {
+      // Extract garage from query
+      const garages = ['BRUUNS','KALKVAERKSVEJ','MAGASIN','SALLING','SCANDCENTER','SKOLEBAKKEN'];
+      const g = garages.find(gr => text.toUpperCase().includes(gr));
+      if (g) payload.garage = g;
+    }
+
+    let result;
+    if (skill.agent === 'temporal' && skill.action === 'predict') {
+      if (!payload.garage) { addAgent('Specify a garage'); continue; }
+      const analysis = await callAPI('/api/orchestrator/analyze', {garage: payload.garage, seed: 7});
+      if (!analysis) continue;
+      result = analysis.error ? analysis : analysis.prediction;
+      if (!analysis.error) addAgent(`HIC: ${analysis.gate.reason}`);
+    } else {
+      result = await callAPI(`/api/agents/${skill.agent}/call`, {action: skill.action, payload});
+    }
+    if (result?.error) { addAgent('Execution incomplete; see returned error'); console.error(result.error); continue; }
+
+
+    if (result) {
+      // Format output based on agent type
+      if (skill.agent === 'temporal' && skill.action === 'predict') {
+        const pred = result.predicted_available?.toFixed?.(0) || result.predicted_available;
+        addAgent(`<span class="name">TemporalAgent:</span> → Forecast<b>${pred}</b> / ${result.capacity||953} spaces(${((result.predicted_available_rate||0)*100).toFixed(1)}%)`);
+        if (result.spatial_attention) {
+          const top = Object.entries(result.spatial_attention).sort((a,b)=>b[1]-a[1])[0];
+          addAgent(`<span class="name">TemporalAgent:</span> → topReference templateanchor=${result.temporal_references?.[Object.keys(result.temporal_references)[0]]?.[0]?.anchor||'—'} (w=${result.temporal_references?.[Object.keys(result.temporal_references)[0]]?.[0]?.weight?.toFixed?.(2)||0})`);
+        }
+      } else if (skill.agent === 'spatial') {
+        const sims = result.most_similar || [];
+        addAgent(`<span class="name">SpatialAgent:</span> → Most similar: ${sims.slice(0,3).map(s=>s[0]+'('+s[1].toFixed(2)+')').join(', ')}`);
+      } else if (skill.agent === 'transfer') {
+        const preds = result.predictions || {};
+        const keys = Object.keys(preds);
+        addAgent(`<span class="name">TransferAgent:</span> → ${keys.length}  targets, From${preds[keys[0]]?.borrowed_from||'—'} Borrow(sim=${preds[keys[0]]?.similarity?.toFixed?.(3)||'—'})`);
+      } else if (skill.agent === 'drone') {
+        addAgent(`<span class="name">DroneFleetAgent:</span> → Status: ${result.kind||'simulation'}, Scene: ${result.scene?.name||'—'}`);
+      } else if (skill.agent === 'detection') {
+        addAgent(`<span class="name">DetectionAgent:</span> → Detected${result.cars_detected||0} vehicles(backend=${result.backend})`);
+      } else {
+        addAgent(`<span class="name">${skill.agent}Agent:</span> → ${JSON.stringify(result).slice(0,100)}`);
+      }
+    }
+  }
+
+  addAgent('──────────────────────────────────');
+}
+
+function quick(text) {
+  cmd.value = text;
+  send();
+}
+</script>
+</body>
+</html>

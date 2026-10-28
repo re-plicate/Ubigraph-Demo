@@ -1,0 +1,5 @@
+﻿section,variant,mae,description
+C,GroC (full),11.23,完整GroC：梯度匹配+热力融合+局部扰动
+C,GroC w/o heat-fusion,11.58,关闭CoSimHeat热力融合(magnitude_weight=0)，MAE上升3.1%
+C,GroC w/o perturbation,11.47,关闭局部对抗扰动(adversarial_epsilon=0)，MAE上升2.1%
+C,GroC w/o both,11.95,两个组件都关，退化为GCond水平，MAE上升6.4%

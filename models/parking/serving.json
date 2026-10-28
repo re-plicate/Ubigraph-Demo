@@ -1,0 +1,64 @@
+{
+  "format_version": 3,
+  "run_hash": "b5450e9550c9cc9a94d18c91bf9fdd42fccf256607a0d526ab54397656155d9d",
+  "seeds": {
+    "7": {
+      "full_history": {
+        "all": "seed_7/all/models/groc_attention.pt"
+      },
+      "fewshot": {
+        "BRUUNS": "seed_7/without_BRUUNS/models/groc_attention.pt",
+        "KALKVAERKSVEJ": "seed_7/without_KALKVAERKSVEJ/models/groc_attention.pt",
+        "MAGASIN": "seed_7/without_MAGASIN/models/groc_attention.pt",
+        "SALLING": "seed_7/without_SALLING/models/groc_attention.pt",
+        "SCANDCENTER": "seed_7/without_SCANDCENTER/models/groc_attention.pt",
+        "SKOLEBAKKEN": "seed_7/without_SKOLEBAKKEN/models/groc_attention.pt"
+      }
+    },
+    "17": {
+      "full_history": {
+        "all": "seed_17/all/models/groc_attention.pt"
+      },
+      "fewshot": {
+        "BRUUNS": "seed_17/without_BRUUNS/models/groc_attention.pt",
+        "KALKVAERKSVEJ": "seed_17/without_KALKVAERKSVEJ/models/groc_attention.pt",
+        "MAGASIN": "seed_17/without_MAGASIN/models/groc_attention.pt",
+        "SALLING": "seed_17/without_SALLING/models/groc_attention.pt",
+        "SCANDCENTER": "seed_17/without_SCANDCENTER/models/groc_attention.pt",
+        "SKOLEBAKKEN": "seed_17/without_SKOLEBAKKEN/models/groc_attention.pt"
+      }
+    },
+    "27": {
+      "full_history": {
+        "all": "seed_27/all/models/groc_attention.pt"
+      },
+      "fewshot": {
+        "BRUUNS": "seed_27/without_BRUUNS/models/groc_attention.pt",
+        "KALKVAERKSVEJ": "seed_27/without_KALKVAERKSVEJ/models/groc_attention.pt",
+        "MAGASIN": "seed_27/without_MAGASIN/models/groc_attention.pt",
+        "SALLING": "seed_27/without_SALLING/models/groc_attention.pt",
+        "SCANDCENTER": "seed_27/without_SCANDCENTER/models/groc_attention.pt",
+        "SKOLEBAKKEN": "seed_27/without_SKOLEBAKKEN/models/groc_attention.pt"
+      }
+    }
+  },
+  "default_protocol": "full_history",
+  "main_variant": "main_12h",
+  "protocol_configs": {
+    "full_history": "config.json",
+    "fewshot": "fewshot_config.json"
+  },
+  "evaluation": {
+    "full_history": {
+      "labels_per_seed": 9748,
+      "history_points": 24,
+      "scope": "主方案与算法、窗口对照共同可评估的9748个标签"
+    },
+    "fewshot": {
+      "labels_per_seed": 9820,
+      "history_points": 12,
+      "scope": "少样本附加试验，6小时历史，9820个标签"
+    }
+  },
+  "metrics_dir": "../../results"
+}

@@ -1,0 +1,4 @@
+﻿n_drones,targets_covered,targets_total,total_distance_m,mission_duration_s,total_energy,reasons
+1,1,6,60,304.0,45.24,none
+2,2,6,100,198.0,69.28,none
+3,3,6,136,164.0,91.24,none

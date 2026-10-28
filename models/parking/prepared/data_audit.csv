@@ -1,0 +1,9 @@
+garage,capacity,raw_rows,invalid_all,invalid_train,train_raw_rows,invalid_train_fraction,valid_grid_observations,grid_points,all_valid_windows,included,exclusion_reason,windows_train,windows_val,windows_test
+BRUUNS,953.0,6908,0,0,3950,0.0,6895,7979,6627,True,,3778,1224,1625
+BUSGADEHUSET,130.0,6908,3888,1887,3950,0.4777215189873418,3017,7979,1336,False,training-period out-of-capacity fraction exceeds threshold,1147,49,140
+KALKVAERKSVEJ,210.0,6908,0,0,3950,0.0,6895,7979,6627,True,,3778,1224,1625
+MAGASIN,400.0,6908,0,0,3950,0.0,6895,7979,6627,True,,3778,1224,1625
+NORREPORT,65.0,6908,630,618,3950,0.15645569620253164,6266,7979,5829,False,training-period out-of-capacity fraction exceeds threshold,3016,1224,1589
+SALLING,700.0,6908,1,0,3950,0.0,6894,7979,6625,True,,3778,1224,1623
+SCANDCENTER,1240.0,6908,0,0,3950,0.0,6895,7979,6627,True,,3778,1224,1625
+SKOLEBAKKEN,512.0,6908,1,0,3950,0.0,6894,7979,6625,True,,3778,1222,1625

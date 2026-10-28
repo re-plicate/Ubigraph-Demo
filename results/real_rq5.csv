@@ -1,0 +1,3 @@
+﻿scenario,mae_persistence,mae_naive_transfer,transfer_gain_pct,n_samples,source
+Aarhus→SFpark (proxy),0.0467,0.1417,-2.0,7195,TransferAgent on real proxy CSVs
+Aarhus→London (proxy),0.0483,0.1622,-2.4,7195,TransferAgent on real proxy CSVs

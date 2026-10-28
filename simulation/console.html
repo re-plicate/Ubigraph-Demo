@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<title>CityClaw Live Console</title>
+<style>
+  body { font-family: 'Segoe UI', monospace; background: #0a0f1e; color: #e2e8f0; margin: 0; padding: 20px; }
+  h1 { color: #38bdf8; font-size: 20px; margin: 0 0 16px; }
+  .grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; max-width: 1400px; margin: 0 auto; }
+  .panel { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 16px; }
+  h3 { font-size: 12px; color: #64748b; text-transform: uppercase; margin: 0 0 12px; }
+  button { background: #38bdf8; color: #0a0f1e; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; width: 100%; margin-bottom: 6px; }
+  button:hover { background: #0ea5e9; }
+  button.secondary { background: #334155; color: #e2e8f0; }
+  button.danger { background: #ef4444; }
+  input, select { width: 100%; padding: 6px; background: #0a0f1e; border: 1px solid #334155; border-radius: 4px; color: #e2e8f0; font-size: 12px; margin-bottom: 6px; }
+  pre { background: #0a0f1e; padding: 12px; border-radius: 4px; font-size: 11px; overflow-x: auto; max-height: 500px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+  .agent-btn { text-align: left; }
+  .agent-btn .name { font-weight: 700; }
+  .agent-btn .actions { font-size: 10px; color: #94a3b8; }
+  .status { font-size: 11px; color: #4ade80; margin-top: 8px; }
+  .status.err { color: #ef4444; }
+</style>
+</head>
+<body>
+<h1>CityClaw Console — Target backend127.0.0.1:8766</h1>
+<div class="grid">
+  <div class="panel">
+    <h3>Orchestrator (Feedback loop)</h3>
+    <label style="font-size:11px;color:#94a3b8">Garage</label>
+    <select id="garage">
+      <option>BRUUNS</option><option>KALKVAERKSVEJ</option><option>MAGASIN</option>
+      <option>SALLING</option><option>SCANDCENTER</option><option>SKOLEBAKKEN</option>
+    </select>
+    <label style="font-size:11px;color:#94a3b8">Seed</label>
+    <input id="seed" value="7">
+    <button onclick="callAnalyze()">▶ Run Analyze (spatial→temporal→hic)</button>
+    <button onclick="callMission()">🚁 Run Mission (Including drone collection)</button>
+    <button class="secondary" onclick="callEvidence()">📜 Evidence Chain</button>
+
+    <h3 style="margin-top:20px">Direct callAgent</h3>
+    <label for="agent-payload">Agent Arguments (JSON；Complete the action fieldsgarage、histories、targets etc.)</label>
+    <textarea id="agent-payload" rows="6" style="width:100%">{}</textarea>
+    <div id="agent-buttons"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Response (JSON)</h3>
+    <div id="status" class="status">Ready</div>
+    <pre id="output">Use the left buttons to call the backendAPI...</pre>
+  </div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8766";
+
+function setStatus(msg, err=false) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status' + (err ? ' err' : '');
+}
+
+function show(data) {
+  document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+}
+
+async function post(path, body) {
+  setStatus('Calling...');
+  try {
+    const r = await fetch(API + path, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    setStatus((r.ok && !data.error ? '✓ ' : '✗ ') + path + ' (' + r.status + ')', !r.ok || !!data.error);
+    show(data);
+    return data;
+  } catch(e) {
+    setStatus('✗ ' + e.message, true);
+  }
+}
+
+async function get(path) {
+  setStatus('Calling...');
+  try {
+    const r = await fetch(API + path);
+    const data = await r.json();
+    setStatus((r.ok && !data.error ? '✓ ' : '✗ ') + path, !r.ok || !!data.error);
+    show(data);
+    return data;
+  } catch(e) {
+    setStatus('✗ ' + e.message, true);
+  }
+}
+
+function callAnalyze() {
+  post('/api/orchestrator/analyze', {
+    garage: document.getElementById('garage').value,
+    seed: parseInt(document.getElementById('seed').value)
+  });
+}
+
+function callMission() {
+  post('/api/orchestrator/mission', {
+    garage: document.getElementById('garage').value,
+    seed: parseInt(document.getElementById('seed').value),
+    allow_drone: true
+  });
+}
+
+function callEvidence() { get('/api/evidence'); }
+
+// Build agent buttons from /api/agents
+async function initAgents() {
+  const data = await get('/api/agents');
+  if (!data) return;
+  const container = document.getElementById('agent-buttons');
+  container.innerHTML = '';
+  data.agents.forEach(a => {
+    a.handlers.forEach(action => {
+      const btn = document.createElement('button');
+      btn.className = 'agent-btn secondary';
+      btn.innerHTML = `<span class="name">${a.name}</span> / ${action}`;
+      btn.onclick = () => {
+        try {
+          const payload = JSON.parse(document.getElementById('agent-payload').value);
+          if (!payload || Array.isArray(payload) || typeof payload !== 'object') throw new Error('Arguments must beJSON object');
+          post(`/api/agents/${a.name}/call`, {action, payload});
+        } catch(e) { setStatus(e.message, true); }
+      };
+      container.appendChild(btn);
+    });
+  });
+}
+
+initAgents();
+</script>
+</body>
+</html>

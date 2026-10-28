@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<title>CityClaw Agent Architecture</title>
+<style>
+  body { font-family: 'Segoe UI', monospace; background: #0a0f1e; color: #e2e8f0; padding: 40px; }
+  h1 { color: #38bdf8; margin-bottom: 30px; }
+  .diagram { max-width: 1100px; margin: 0 auto; }
+  .orchestrator { background: #1e3a5f; border: 2px solid #38bdf8; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 30px; }
+  .orchestrator h2 { color: #93c5fd; margin: 0 0 8px; }
+  .orchestrator .actions { font-size: 12px; color: #64748b; }
+  .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+  .agent { background: #111827; border: 1px solid #334155; border-radius: 8px; padding: 14px; }
+  .agent h3 { margin: 0 0 8px; font-size: 14px; }
+  .agent .io { font-size: 11px; color: #94a3b8; line-height: 1.6; }
+  .agent .actions-list { margin-top: 8px; font-size: 10px; color: #4ade80; }
+  .agent.temporal h3 { color: #4ade80; }
+  .agent.spatial h3 { color: #fbbf24; }
+  .agent.transfer h3 { color: #c084fc; }
+  .agent.detection h3 { color: #f87171; }
+  .agent.drone h3 { color: #fb923c; }
+  .agent.hic h3 { color: #22d3ee; }
+  .arrow { text-align: center; color: #475569; font-size: 20px; margin: 8px 0; }
+  .bus { background: #0f172a; border: 1px dashed #475569; border-radius: 6px; padding: 10px; text-align: center; font-size: 11px; color: #64748b; margin-top: 20px; }
+  .code-ref { font-size: 10px; color: #475569; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="diagram">
+<h1>CityClaw Multi-Agent Framework (from actual code)</h1>
+
+<div class="orchestrator">
+  <h2>🎯 OrchestratorAgent</h2>
+  <div class="actions">actions: <b>analyze</b> | <b>run_mission</b></div>
+  <div style="font-size:12px;margin-top:8px;color:#93c5fd">
+    analyze: spatial → temporal → hic<br>
+    run_mission: analyze → (hic.trigger? → drone.plan → drone.start) → re-analyze
+  </div>
+  <div class="code-ref">ubigraph_agents/orchestrator.py</div>
+</div>
+
+<div class="arrow">↓ calls via AgentBus (Envelope{action, payload}) ↓</div>
+
+<div class="row">
+  <div class="agent temporal">
+    <h3>⏱ TemporalAgent</h3>
+    <div class="io">
+      <b>IN:</b> garage, histories(DataFrame), seed<br>
+      <b>OUT:</b> predicted_available, rate, spatial_attention, temporal_references
+    </div>
+    <div class="actions-list">actions: predict, names</div>
+    <div class="code-ref">temporal_agent.py</div>
+  </div>
+  <div class="agent spatial">
+    <h3>🗺 SpatialAgent</h3>
+    <div class="io">
+      <b>IN:</b> garage, topk<br>
+      <b>OUT:</b> most_similar garages, similarity matrix
+    </div>
+    <div class="actions-list">actions: similarity, neighbors</div>
+    <div class="code-ref">spatial_agent.py</div>
+  </div>
+  <div class="agent hic">
+    <h3>👤 HICAgent</h3>
+    <div class="io">
+      <b>IN:</b> prediction, uncertainty, cost<br>
+      <b>OUT:</b> trigger_human(bool), reason, risk
+    </div>
+    <div class="actions-list">actions: evaluate, feedback, feedback_log</div>
+    <div class="code-ref">hic_agent.py</div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="agent drone">
+    <h3>🚁 DroneFleetAgent</h3>
+    <div class="io">
+      <b>IN:</b> targets, dwell_seconds, plan_id<br>
+      <b>OUT:</b> plan(id, feasible), mission(state, mavlink telemetry)
+    </div>
+    <div class="actions-list">actions: state, plan, start, cancel, mavlink_connect, mavlink_command</div>
+    <div class="code-ref">drone_agent.py</div>
+  </div>
+  <div class="agent detection">
+    <h3>📷 DetectionAgent</h3>
+    <div class="io">
+      <b>IN:</b> image (or None)<br>
+      <b>OUT:</b> cars_detected, segmented, backend status
+    </div>
+    <div class="actions-list">actions: detect, status</div>
+    <div class="code-ref">detection_agent.py</div>
+  </div>
+  <div class="agent transfer">
+    <h3>🔄 TransferAgent</h3>
+    <div class="io">
+      <b>IN:</b> source DataFrame, target DataFrame<br>
+      <b>OUT:</b> predictions per target, borrowed_from, similarity
+    </div>
+    <div class="actions-list">actions: transfer_predict, transfer_gain</div>
+    <div class="code-ref">transfer_agent.py</div>
+  </div>
+</div>
+
+<div class="bus">
+  <b>AgentBus</b> — sync in-process message bus | Evidence chain: Message(seq, ts, src, dst, action, payload, status) |
+  base.py: Agent.handle(Envelope) → dict | Agent.call(dst, Envelope) → dict
+</div>
+
+<div style="margin-top:30px;font-size:12px;color:#64748b;line-height:1.8">
+  <b>Validation:</b>Allagent Verified,I/O Value inresults/agent_io_log.py<br>
+  <b>Feedback loop:</b>run_mission → IfHIC Triggered→ CallDroneFleet.plan/start → Next roundanalyze Using collected data<br>
+  <b>NoLLM：</b>Orchestrator is deterministic synchronous code and reproducible</div>
+
+</div>
+</body>
+</html>

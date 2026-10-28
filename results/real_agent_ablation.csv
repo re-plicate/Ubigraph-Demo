@@ -1,0 +1,7 @@
+﻿agent,action,call_ms,ok,out_keys
+TemporalAgent,predict,7085.0,True,['error']
+SpatialAgent,similarity,0.3,True,['error']
+TransferAgent,transfer_predict,178.6,True,"['method', 'predictions']"
+DetectionAgent,detect,3.9,True,"['backend', 'image', 'cars_detected', 'segmented', 'note']"
+DroneFleetAgent,state,27.0,True,"['kind', 'backend', 'scene', 'epoch', 'sim_time', 'speed']"
+HumanInLoopAgent,evaluate,0.0,False,'float' object has no attribute 'get'

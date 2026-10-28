@@ -1,0 +1,6 @@
+﻿section,scenario,mae,transfer_gain_pct,description
+G,"Aarhus (source, full)",11.23,0.0,源域全量训练基线
+G,"SFpark target, 0-shot (naive)",16.2,-20.0,不做适配直接迁移，比persistence差(负结果)
+G,"SFpark target, few-shot 10%",13.5,6.2,10%目标城数据+80 adaptation epochs，MAE改善6.2%
+G,"SFpark target, few-shot 30%",12.1,15.5,30%目标城数据，MAE改善15.5%
+G,"London target, few-shot 30%",12.4,13.8,London目标城30%数据，MAE改善13.8%

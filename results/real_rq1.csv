@@ -1,0 +1,7 @@
+﻿method,mae,std,rmse,n_labels,source
+Persistence,,,,,NOT FOUND
+Seasonal-Naive 24h,,0.0,,0.0,"raw data, shift(48) on test set"
+GCond (6h),,,,,NOT FOUND
+GroC 6h,,,,,NOT FOUND
+GroC 12h 主方案,,,,,NOT FOUND
+Full oracle,,,,,NOT FOUND

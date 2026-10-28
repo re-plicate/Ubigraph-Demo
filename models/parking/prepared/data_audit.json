@@ -1,0 +1,170 @@
+{
+  "raw_rows": 55264,
+  "deduplicated_rows": 55264,
+  "duplicate_garage_timestamps": 0,
+  "raw_invalid_rows": 4520,
+  "distinct_event_times": 6908,
+  "first_event": "2014-05-22 09:09:04.145000",
+  "last_event": "2014-11-04 14:13:47.581000",
+  "median_gap_minutes": 30.0,
+  "max_gap_hours": 245.7839997222222,
+  "raw_sha256": "d563c70b165541fdd4f50ffefd8ada994d043f93bc63a7a1f27b1dfab257e794",
+  "metadata_sha256": "55bd3adf838d9edc5a9c0f4146935751cc72ff1611d458ea1a19c5865d26bc43",
+  "time_axis": "updatetime; original timezone unspecified; right-closed causal ceil bins",
+  "train_end_exclusive": "2014-09-01 00:00:00",
+  "val_end_exclusive": "2014-10-01 00:00:00",
+  "garages": [
+    {
+      "garage": "BRUUNS",
+      "capacity": 953.0,
+      "raw_rows": 6908,
+      "invalid_all": 0,
+      "invalid_train": 0,
+      "train_raw_rows": 3950,
+      "invalid_train_fraction": 0.0,
+      "valid_grid_observations": 6895,
+      "grid_points": 7979,
+      "all_valid_windows": 6627,
+      "windows": {
+        "train": 3778,
+        "val": 1224,
+        "test": 1625
+      },
+      "included": true,
+      "exclusion_reason": null
+    },
+    {
+      "garage": "BUSGADEHUSET",
+      "capacity": 130.0,
+      "raw_rows": 6908,
+      "invalid_all": 3888,
+      "invalid_train": 1887,
+      "train_raw_rows": 3950,
+      "invalid_train_fraction": 0.4777215189873418,
+      "valid_grid_observations": 3017,
+      "grid_points": 7979,
+      "all_valid_windows": 1336,
+      "windows": {
+        "train": 1147,
+        "val": 49,
+        "test": 140
+      },
+      "included": false,
+      "exclusion_reason": "training-period out-of-capacity fraction exceeds threshold"
+    },
+    {
+      "garage": "KALKVAERKSVEJ",
+      "capacity": 210.0,
+      "raw_rows": 6908,
+      "invalid_all": 0,
+      "invalid_train": 0,
+      "train_raw_rows": 3950,
+      "invalid_train_fraction": 0.0,
+      "valid_grid_observations": 6895,
+      "grid_points": 7979,
+      "all_valid_windows": 6627,
+      "windows": {
+        "train": 3778,
+        "val": 1224,
+        "test": 1625
+      },
+      "included": true,
+      "exclusion_reason": null
+    },
+    {
+      "garage": "MAGASIN",
+      "capacity": 400.0,
+      "raw_rows": 6908,
+      "invalid_all": 0,
+      "invalid_train": 0,
+      "train_raw_rows": 3950,
+      "invalid_train_fraction": 0.0,
+      "valid_grid_observations": 6895,
+      "grid_points": 7979,
+      "all_valid_windows": 6627,
+      "windows": {
+        "train": 3778,
+        "val": 1224,
+        "test": 1625
+      },
+      "included": true,
+      "exclusion_reason": null
+    },
+    {
+      "garage": "NORREPORT",
+      "capacity": 65.0,
+      "raw_rows": 6908,
+      "invalid_all": 630,
+      "invalid_train": 618,
+      "train_raw_rows": 3950,
+      "invalid_train_fraction": 0.15645569620253164,
+      "valid_grid_observations": 6266,
+      "grid_points": 7979,
+      "all_valid_windows": 5829,
+      "windows": {
+        "train": 3016,
+        "val": 1224,
+        "test": 1589
+      },
+      "included": false,
+      "exclusion_reason": "training-period out-of-capacity fraction exceeds threshold"
+    },
+    {
+      "garage": "SALLING",
+      "capacity": 700.0,
+      "raw_rows": 6908,
+      "invalid_all": 1,
+      "invalid_train": 0,
+      "train_raw_rows": 3950,
+      "invalid_train_fraction": 0.0,
+      "valid_grid_observations": 6894,
+      "grid_points": 7979,
+      "all_valid_windows": 6625,
+      "windows": {
+        "train": 3778,
+        "val": 1224,
+        "test": 1623
+      },
+      "included": true,
+      "exclusion_reason": null
+    },
+    {
+      "garage": "SCANDCENTER",
+      "capacity": 1240.0,
+      "raw_rows": 6908,
+      "invalid_all": 0,
+      "invalid_train": 0,
+      "train_raw_rows": 3950,
+      "invalid_train_fraction": 0.0,
+      "valid_grid_observations": 6895,
+      "grid_points": 7979,
+      "all_valid_windows": 6627,
+      "windows": {
+        "train": 3778,
+        "val": 1224,
+        "test": 1625
+      },
+      "included": true,
+      "exclusion_reason": null
+    },
+    {
+      "garage": "SKOLEBAKKEN",
+      "capacity": 512.0,
+      "raw_rows": 6908,
+      "invalid_all": 1,
+      "invalid_train": 0,
+      "train_raw_rows": 3950,
+      "invalid_train_fraction": 0.0,
+      "valid_grid_observations": 6894,
+      "grid_points": 7979,
+      "all_valid_windows": 6625,
+      "windows": {
+        "train": 3778,
+        "val": 1222,
+        "test": 1625
+      },
+      "included": true,
+      "exclusion_reason": null
+    }
+  ]
+}

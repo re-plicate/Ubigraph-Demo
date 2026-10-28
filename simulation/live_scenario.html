@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<title>CityClaw — Live Urban Parking Intervention</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:#0a0f1e; color:#e2e8f0; overflow:hidden; }
+  .app { display:grid; grid-template-rows:auto 1fr auto; height:100vh; }
+
+  /* Header */
+  header { background:#111827; padding:10px 20px; border-bottom:1px solid #1f2937; display:flex; align-items:center; gap:16px; }
+  header h1 { font-size:15px; color:#38bdf8; }
+  .clock { font-family:monospace; font-size:14px; color:#4ade80; font-weight:600; }
+  .status-pill { font-size:11px; padding:3px 10px; border-radius:10px; background:#1e3a5f; color:#93c5fd; }
+  .status-pill.alert { background:#7f1d1d; color:#fca5a5; animation:pulse 1s infinite; }
+
+  /* Main */
+  .main { display:grid; grid-template-columns:1fr 380px; overflow:hidden; }
+  #map-wrap { position:relative; background:#0a0f1e; }
+  #map { width:100%; height:100%; }
+
+  /* Right panel */
+  .side { background:#111827; border-left:1px solid #1f2937; padding:14px; overflow-y:auto; }
+  h3 { font-size:10px; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin:14px 0 8px; }
+  h3:first-child { margin-top:0; }
+
+  /* Prediction cards */
+  .pred-card { background:#0a0f1e; border-radius:6px; padding:10px; margin-bottom:8px; border-left:3px solid #334155; }
+  .pred-card.alert { border-left-color:#ef4444; }
+  .pred-card.improved { border-left-color:#4ade80; }
+  .pred-card .garage { font-weight:600; font-size:13px; }
+  .pred-card .row { display:flex; justify-content:space-between; font-size:11px; margin-top:3px; }
+  .pred-card .mae-old { color:#f87171; }
+  .pred-card .mae-new { color:#4ade80; font-weight:700; }
+  .pred-card .badge { font-size:9px; padding:2px 6px; border-radius:3px; margin-left:6px; }
+  .badge.fail { background:#7f1d1d; color:#fca5a5; }
+  .badge.drone { background:#78350f; color:#fde68a; }
+
+  /* Agent log */
+  .log { background:#0a0f1e; border-radius:6px; padding:8px; font-size:10px; font-family:monospace; max-height:200px; overflow-y:auto; line-height:1.6; }
+  .log .t { color:#64748b; }
+  .log .agent { color:#93c5fd; }
+  .log .io { color:#94a3b8; }
+  .log .ok { color:#4ade80; }
+  .log .warn { color:#fbbf24; }
+
+  /* Buttons */
+  button { background:#38bdf8; color:#0a0f1e; border:none; padding:8px 14px; border-radius:5px; font-weight:600; cursor:pointer; font-size:12px; width:100%; margin-bottom:6px; }
+  button:hover { background:#0ea5e9; }
+  button:disabled { background:#334155; color:#64748b; cursor:not-allowed; }
+  button.drone { background:#fbbf24; color:#0a0f1e; }
+
+  /* Bottom telemetry */
+  footer { background:#0a0f1e; border-top:1px solid #1f2937; padding:6px 20px; display:flex; gap:18px; font-family:monospace; font-size:10px; overflow-x:auto; }
+  .ft .l { color:#64748b; }
+  .ft .v { color:#4ade80; font-weight:600; }
+  .ft .v.warn { color:#fbbf24; }
+
+  .glabel { font-size:9px; fill:#94a3b8; text-anchor:middle; font-family:monospace; }
+  .drone-path { stroke:#fbbf24; stroke-width:1.5; stroke-dasharray:4,3; fill:none; opacity:0.4; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+</style>
+</head>
+<body>
+<div style="position:fixed;bottom:36px;left:12px;right:12px;z-index:999;background:#7f1d1d;color:white;padding:10px;font-size:13px">Concept demonstration: animations, faults, detection logs andMAE Values include synthetic frontend data, not real telemetry or measured model performance. Use the main workspace for actual simulator state8765。</div>
+<div class="app">
+  <header>
+    <h1>CityClaw</h1>
+    <div class="clock" id="clock">2014-10-01 00:00</div>
+    <div class="status-pill" id="sys-status">Running</div>
+    <div style="margin-left:auto;font-size:11px;color:#64748b">Backend: 127.0.0.1:8766</div>
+  </header>
+
+  <div class="main">
+    <div id="map-wrap">
+      <svg id="map" viewBox="0 0 800 560" preserveAspectRatio="xMidYMid meet">
+        <g stroke="#1a2332" stroke-width="1">
+          <line x1="0" y1="140" x2="800" y2="140"/><line x1="0" y1="280" x2="800" y2="280"/><line x1="0" y1="420" x2="800" y2="420"/>
+          <line x1="200" y1="0" x2="200" y2="560"/><line x1="400" y1="0" x2="400" y2="560"/><line x1="600" y1="0" x2="600" y2="560"/>
+        </g>
+        <g id="paths"></g>
+        <g id="garages"></g>
+        <g id="drones"></g>
+      </svg>
+    </div>
+
+    <div class="side">
+      <h3>Forecast(Next hour)</h3>
+      <div id="predictions"></div>
+
+      <h3>Intervention</h3>
+      <button class="drone" id="btn-drone" onclick="dispatchDrone()">🚁 Dispatch simulated collection</button>
+      <button onclick="resetSim()">↺ Reset simulation</button>
+
+      <h3>Agent Decision flow</h3>
+      <div class="log" id="log">Waiting for forecast...</div>
+
+      <h3>MAE Compare</h3>
+      <div id="mae-compare" style="font-size:11px;line-height:1.8">
+        <div>Original forecastMAE: <b id="mae-before">11.23</b></div>
+        <div>After interventionMAE: <b id="mae-after" style="color:#4ade80">—</b></div>
+        <div>Improvement: <b id="mae-improve" style="color:#4ade80">—</b></div>
+      </div>
+    </div>
+  </div>
+
+  <footer id="telemetry">
+    <div class="ft"><span class="l">DRONE:</span> <span class="v" id="t-drone">—</span></div>
+    <div class="ft"><span class="l">BATT:</span> <span class="v" id="t-batt">100%</span></div>
+    <div class="ft"><span class="l">MODE:</span> <span class="v" id="t-mode">IDLE</span></div>
+    <div class="ft"><span class="l">TARGET:</span> <span class="v" id="t-target">—</span></div>
+    <div class="ft"><span class="l">SENSOR_FAIL:</span> <span class="v warn" id="t-fail">None</span></div>
+    <div class="ft"><span class="l">EVIDENCE_MSGS:</span> <span class="v" id="t-evidence">0</span></div>
+  </footer>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8766";
+
+// Garage positions
+const GARAGES = [
+  { name:"BRUUNS", x:150, y:100, cap:953, base:0.5 },
+  { name:"KALKVAERKSVEJ", x:350, y:70, cap:1000, base:0.6 },
+  { name:"MAGASIN", x:550, y:110, cap:600, base:0.4 },
+  { name:"SALLING", x:700, y:180, cap:900, base:0.7 },
+  { name:"SCANDCENTER", x:100, y:320, cap:700, base:0.55 },
+  { name:"SKOLEBAKKEN", x:300, y:380, cap:500, base:0.35 },
+];
+
+// State
+let simTime = new Date("2014-10-01T00:00:00");
+let failGarage = null;
+let failUntil = null;
+let droneState = { flying:false, x:30, y:30, target:null, battery:100, returning:false };
+let predictions = {};
+let evidenceCount = 0;
+let interventionDone = false;
+let hourCount = 0;
+
+function log(msg, cls="io") {
+  const el = document.getElementById('log');
+  const t = simTime.toISOString().slice(11,16);
+  el.innerHTML += `<div><span class="t">[${t}]</span> <span class="${cls}">${msg}</span></div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function drawMap() {
+  const now = Date.now()/5000;
+  document.getElementById('garages').innerHTML = GARAGES.map((g,i) => {
+    const occ = Math.max(0.1, Math.min(0.95, g.base + 0.2*Math.sin(now + i*1.2)));
+    const cls = occ>0.7 ? '#dc2626' : occ>0.45 ? '#f59e0b' : '#22c55e';
+    const failed = failGarage === g.name;
+    return `<circle cx="${g.x}" cy="${g.y}" r="18" fill="${cls}" ${failed?'opacity=0.2 stroke="#ef4444" stroke-width="3" stroke-dasharray="3,2"':''}/>
+            <text class="glabel" x="${g.x}" y="${g.y+32}">${g.name}</text>
+            <text class="glabel" x="${g.x}" y="${g.y+44}" style="font-size:8px">${(occ*100).toFixed(0)}%${failed?' ⚠':''}</text>`;
+  }).join('');
+
+  // Drone
+  if (droneState.flying) {
+    document.getElementById('paths').innerHTML = `<line class="drone-path" x1="30" y1="30" x2="${droneState.target.x}" y2="${droneState.target.y}"/>`;
+    document.getElementById('drones').innerHTML = `<circle cx="${droneState.x}" cy="${droneState.y}" r="6" fill="#fbbf24"><animate attribute="r" values="5;7;5" dur="0.8s" repeatCount="indefinite"/></circle>`;
+  } else {
+    document.getElementById('paths').innerHTML = '';
+    document.getElementById('drones').innerHTML = '';
+  }
+}
+
+function updateTelemetry() {
+  document.getElementById('clock').textContent = simTime.toISOString().slice(0,16).replace('T',' ');
+  document.getElementById('t-fail').textContent = failGarage ? failGarage : 'None';
+  document.getElementById('t-fail').className = failGarage ? 'v warn' : 'v';
+  document.getElementById('t-batt').textContent = droneState.battery.toFixed(0)+'%';
+  document.getElementById('t-batt').className = droneState.battery<25 ? 'v warn' : 'v';
+  document.getElementById('t-mode').textContent = droneState.flying ? (droneState.returning?'RTB':'GO_TO') : 'IDLE';
+  document.getElementById('t-target').textContent = droneState.target ? droneState.target.name : '—';
+  document.getElementById('t-evidence').textContent = evidenceCount;
+}
+
+async function callBackend(path, body) {
+  try {
+    const r = await fetch(API+path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    return await r.json();
+  } catch(e) {
+    log(`Backend connection failed: ${e.message}`, 'warn');
+    return null;
+  }
+}
+
+async function predictHour() {
+  hourCount++;
+  // Random sensor failure every ~5 hours, lasts 3 hours
+  if (!failGarage && hourCount > 2 && Math.random() < 0.15) {
+    failGarage = GARAGES[Math.floor(Math.random()*GARAGES.length)].name;
+    failUntil = hourCount + 3;
+    log(`⚠ Sensor offline: ${failGarage}`, 'warn');
+    document.getElementById('sys-status').textContent = `Sensor fault: ${failGarage}`;
+    document.getElementById('sys-status').className = 'status-pill alert';
+  }
+  if (failGarage && hourCount >= failUntil) {
+    log(`Sensor restored: ${failGarage}`, 'ok');
+    failGarage = null; failUntil = null;
+    document.getElementById('sys-status').textContent = 'Running';
+    document.getElementById('sys-status').className = 'status-pill';
+  }
+
+  // Call backend for prediction
+  const g = failGarage || GARAGES[0].name;
+  log(`Run TemporalAgent.predict(${g})...`, 'agent');
+  const result = await callBackend('/api/orchestrator/analyze', {garage:g, seed:7});
+  if (result) {
+    const pred = result.prediction;
+    predictions[g] = pred;
+    log(`→ Forecast${pred.predicted_available?.toFixed?.(0) || pred.predicted_available} spaces(rate=${pred.predicted_available_rate?.toFixed?.(2)})`, 'io');
+    log(`Spatial: Most similar= ${JSON.stringify(result.spatial_prior?.most_similar?.[0] || '—')}`, 'io');
+    log(`HIC: trigger_human=${result.gate?.trigger_human} (${result.gate?.reason||'—'})`, result.gate?.trigger_human ? 'warn' : 'io');
+    evidenceCount += 4;
+
+    // Update prediction card
+    updatePredictionCard(g, pred, result.gate?.trigger_human);
+  }
+}
+
+function updatePredictionCard(g, pred, alert) {
+  const container = document.getElementById('predictions');
+  const existing = document.getElementById('pred-'+g);
+  const html = `<div class="pred-card ${alert?'alert':''}" id="pred-${g}">
+    <div class="garage">${g} ${alert?'<span class="badge fail">UNRELIABLE</span>':''}</div>
+    <div class="row"><span>Predicted spaces</span><b>${pred.predicted_available?.toFixed?.(0)||pred.predicted_available}</b></div>
+    <div class="row"><span>Availability rate</span><span>${(pred.predicted_available_rate*100||0).toFixed(1)}%</span></div>
+  </div>`;
+  if (existing) existing.outerHTML = html;
+  else container.innerHTML += html;
+}
+
+async function dispatchDrone() {
+  if (!failGarage) { log('No sensor fault; no dispatch needed', 'warn'); return; }
+  const target = GARAGES.find(g => g.name === failGarage);
+  if (!target) return;
+
+  log('👤 User request: Dispatch simulated collection', 'agent');
+  log('Orchestrator → DroneFleetAgent.plan()...', 'agent');
+
+  const mission = await callBackend('/api/orchestrator/mission', {
+    garage: failGarage, seed: 7, allow_drone: true
+  });
+
+  if (mission) {
+    log(`→ Drone plan: ${JSON.stringify(mission.drone_plan?.feasible || '—')}`, 'ok');
+    log(`→ Mission: ${JSON.stringify(mission.drone_mission?.state || '—')}`, 'ok');
+    evidenceCount += 6;
+  }
+
+  // Animate drone flight
+  droneState.flying = true;
+  droneState.returning = false;
+  droneState.target = target;
+  droneState.x = 30; droneState.y = 30;
+  document.getElementById('btn-drone').disabled = true;
+
+  // Animate over 4 seconds
+  const duration = 4000;
+  const start = Date.now();
+  const anim = setInterval(() => {
+    const elapsed = Date.now() - start;
+    const t = Math.min(1, elapsed / duration);
+    if (!droneState.returning) {
+      droneState.x = 30 + (target.x - 30) * t;
+      droneState.y = 30 + (target.y - 30) * t;
+      droneState.battery = 100 - t * 30;
+      if (t >= 1) {
+        droneState.returning = true;
+        log(`🚁 Arrived${target.name}, Detecting vehicles...`, 'ok');
+        log('DetectionAgent.detect() → cars=8, occupancy=0.62', 'ok');
+        log('TransferAgent.transfer_predict() → Revise forecast using collected data', 'agent');
+        evidenceCount += 3;
+
+        // Show improved MAE
+        setTimeout(() => {
+          document.getElementById('mae-after').textContent = (11.23 - 1.8).toFixed(2);
+          document.getElementById('mae-improve').textContent = '-16.0%';
+          document.getElementById('btn-drone').disabled = false;
+          log(`✓ Intervention completed: MAE 11.23 → 9.43 (−16%)`, 'ok');
+        }, 1000);
+      }
+    } else {
+      droneState.x = target.x + (30 - target.x) * t;
+      droneState.y = target.y + (30 - target.y) * t;
+      droneState.battery = 70 - t * 20;
+      if (t >= 1) {
+        clearInterval(anim);
+        droneState.flying = false;
+        log('🚁 Drone returning to recharge', 'io');
+      }
+    }
+    drawMap();
+    updateTelemetry();
+  }, 50);
+}
+
+function resetSim() {
+  simTime = new Date("2014-10-01T00:00:00");
+  failGarage = null; failUntil = null;
+  droneState = {flying:false,x:30,y:30,target:null,battery:100,returning:false};
+  predictions = {}; hourCount = 0; evidenceCount = 0;
+  document.getElementById('predictions').innerHTML = '';
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('mae-after').textContent = '—';
+  document.getElementById('mae-improve').textContent = '—';
+  document.getElementById('sys-status').textContent = 'Running';
+  document.getElementById('sys-status').className = 'status-pill';
+  log('Reset simulation', 'ok');
+}
+
+// Main loop
+setInterval(() => {
+  simTime = new Date(simTime.getTime() + 3600*1000); // 1 hour per tick
+  drawMap();
+  updateTelemetry();
+  predictHour();
+}, 5000); // every 5 seconds = 1 hour sim time
+
+drawMap();
+updateTelemetry();
+log('CityClaw Start, Each5 seconds per step1 hours', 'ok');
+log('Waiting for a sensor fault event...', 'io');
+</script>
+</body>
+</html>

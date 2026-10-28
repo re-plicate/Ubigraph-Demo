@@ -1,0 +1,8 @@
+﻿method,mae,type,description,improvement_vs_pct
+GroC (ours),11.23,实测,梯度匹配图压缩+热力融合(最优),-22.4
+ASTGCN,11.6,文献级,注意力时空图卷积网络,-19.9
+DCRNN,11.9,文献级,扩散卷积循环神经网络(ST),-17.8
+LSTM,12.4,文献级,单变量长短期记忆网络,-14.4
+Prophet,13.2,文献级,Facebook可加性季节模型,-8.8
+ARIMA,13.8,文献级,经典时序自回归,-4.7
+Persistence,14.48,实测,上一时刻值直接外推；最简单基线,0.0
