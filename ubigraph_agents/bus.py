@@ -31,7 +31,7 @@ class AgentBus:
         target = self.agents.get(dst)
         if target is None:
             self.log(src, dst, env.action, env.payload, status="error", note="no such agent")
-            return {"error": f"agent {dst} 不存在"}
+            return {"error": f"agent {dst} does not exist"}
         try:
             result = target.handle(env)
             status = "ok" if "error" not in result else "error"
@@ -40,7 +40,7 @@ class AgentBus:
             return result
         except Exception as exc:  # keep the bus alive across agent failures
             self.log(src, dst, env.action, env.payload, status="error", note=repr(exc)[:200])
-            return {"error": f"{dst} 执行异常: {exc!r}"}
+            return {"error": f"{dst} failed: {exc!r}"}
 
     @staticmethod
     def _summary(value):

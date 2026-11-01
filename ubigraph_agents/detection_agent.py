@@ -47,7 +47,7 @@ class DetectionAgent(Agent):
         self._ensure_model()
         return {"backend": self._backend, "weights": self.weights,
                 "available": self._model is not None, "load_error": self._load_error,
-                "note": "请配置 UBIGRAPH_DETECTION_WEIGHTS；桩值仅允许显式 demo=true"}
+                "note": 'Configure UBIGRAPH_DETECTION_WEIGHTS. Stub output requires an explicit demo=true request.'}
 
     def _detect(self, env: Envelope) -> dict:
         image = env.payload.get("image")
@@ -65,10 +65,10 @@ class DetectionAgent(Agent):
                         "error": f"real inference failed: {exc!r}"}
         if env.payload.get("demo") is not True:
             return {"ok": False, "backend": "unavailable", "cars_detected": None,
-                    "error": self._load_error or "需要图像和有效检测权重；未执行真实检测"}
+                    "error": self._load_error or 'An image and valid detection weights are required. No real detection was performed.'}
         # Explicit demonstration only; never a measurement.
         import hashlib
         h = int(hashlib.md5(str(image).encode()).hexdigest(), 16)
         return {"ok": True, "demo": True, "backend": "stub", "image": str(image),
                 "cars_detected": h % 24 + 4, "segmented": False,
-                "note": "演示桩值，禁止写入真实观测或用于效果评估"}
+                "note": 'Demonstration stub. Do not store as measured data or use in evaluation.'}

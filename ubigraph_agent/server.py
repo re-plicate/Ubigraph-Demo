@@ -55,7 +55,7 @@ def make_handler(runtime):
                 raise ValueError("Submit requests from the local console")
             value = json.loads(self.rfile.read(size))
             if not isinstance(value, dict):
-                raise ValueError("Request must be aJSONobject")
+                raise ValueError("Request must be a JSON object")
             return value
 
         def do_GET(self):
@@ -96,7 +96,7 @@ def make_handler(runtime):
                     return self.send_json({"capabilities": runtime.engine.capabilities(), "context": context,
                          "provider": runtime.cfg.public(), "provider_status": runtime.provider_status, "models": runtime.models,
                          "overview": runtime.engine.inspect(runtime.engine.names, context),
-                         "spatial": runtime.engine.spatial("BRUUNS", context), "benchmarks": runtime.engine.benchmarks()})
+                         "spatial": runtime.engine.spatial("BRUUNS", context), "model_info": runtime.engine.model_info()})
                 if path == "/api/sessions":
                     return self.send_json({"sessions": runtime.memory.sessions()})
                 if path.startswith("/api/sessions/"):
@@ -238,12 +238,12 @@ def main():
                 return
         except (OSError, ValueError):
             pass
-    print("Loading UbiGraph Data and V3 Model...", flush=True)
+    print("Loading UbiGraph data and the pretrained model...", flush=True)
     runtime = AgentRuntime(cfg, V3Engine(cfg.run_dir), drone_service=DroneService(cfg.runtime_dir/"drone"))
     threading.Thread(target=runtime.discover, daemon=True).start()
     server = ThreadingHTTPServer((cfg.host, cfg.port), make_handler(runtime))
     print(f"UbiGraph Agent: http://{cfg.host}:{server.server_port}", flush=True)
-    print(f"ResponsesModel: {cfg.model} · Reasoning effort: {cfg.reasoning_effort} · Browser drone motion simulation enabled (no hardware)", flush=True)
+    print(f"Chat model: {cfg.model} · Reasoning effort: {cfg.reasoning_effort} · Browser drone motion simulation enabled (no hardware)", flush=True)
     if args.open_browser:
         threading.Timer(.5, lambda: webbrowser.open(f"http://{cfg.host}:{server.server_port}")).start()
     try:

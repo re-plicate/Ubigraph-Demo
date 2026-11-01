@@ -55,7 +55,7 @@ class TransferAgent(Agent):
         source = env.payload.get("source")
         target = env.payload.get("target")
         if source is None or target is None:
-            return {"error": "需要 source 和 target 长表 DataFrame"}
+            return {"error": 'source and target must be long-format DataFrames'}
         sim = self._similarity_matrix(source, target)
         target_codes = sorted(target["garagecode"].unique())
         source_codes = sorted(source["garagecode"].unique())

@@ -27,7 +27,7 @@ class TemporalAgent(Agent):
             from ubigraph_st.serving import predict_saved  # noqa: F401
             registry = self.run / "serving.json"
             if not registry.exists():
-                return {"garages": [], "error": "serving.json 不存在"}
+                return {"garages": [], "error": 'serving.json does not exist'}
             import json
             reg = json.loads(registry.read_text())
             seeds = list(reg.get("seeds", {}).keys())
@@ -45,9 +45,9 @@ class TemporalAgent(Agent):
         seed = env.payload.get("seed", 7)
         as_of = env.payload.get("as_of")
         if garage is None:
-            return {"error": "predict 需要 garage"}
+            return {"error": 'predict requires garage'}
         if histories is None:
-            return {"error": "predict 需要 histories (DataFrame 或 CSV 路径)"}
+            return {"error": 'predict requires histories as a DataFrame or a CSV path'}
         if isinstance(histories, (str, Path)):
             histories = pd.read_csv(histories)
         try:

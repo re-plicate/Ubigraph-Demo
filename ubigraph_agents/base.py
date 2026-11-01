@@ -50,12 +50,12 @@ class Agent:
     def handle(self, env: Envelope) -> dict:
         handler = self.handlers.get(env.action)
         if handler is None:
-            return {"error": f"{self.name} 不支持动作 {env.action}"}
+            return {"error": f"{self.name} does not support action {env.action}"}
         return handler(env)
 
     def call(self, dst: str, env: Envelope) -> dict:
         if self.bus is None:
-            return {"error": f"{self.name} 未连接 bus"}
+            return {"error": f"{self.name} is not connected to a bus"}
         return self.bus.dispatch(src=self.name, dst=dst, env=env)
 
     def emit(self, action: str, **payload) -> None:

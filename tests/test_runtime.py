@@ -16,7 +16,7 @@ class StubEngine:
     names = ["BRUUNS"]
 
     def context(self, value=None):
-        return value or {"as_of": "2014-09-30 23:30:00", "protocol": "fewshot", "seed": 7}
+        return value or {"as_of": "2014-09-30 23:30:00", "protocol": "full_history", "seed": 7}
 
 
 def test_utf8_bom_environment_file_loads_configuration(tmp_path, monkeypatch):
@@ -24,7 +24,7 @@ def test_utf8_bom_environment_file_loads_configuration(tmp_path, monkeypatch):
     for key in ("OPENAI_API_KEY", "OPENAI_BASE_URL", "OPENAI_MODEL", "OPENAI_REASONING_EFFORT"):
         monkeypatch.delenv(key, raising=False)
     (tmp_path / ".env.local").write_text(
-        '# 本机模型配置\nOPENAI_API_KEY=local-fixture-value\n'
+        '# Local model configuration\nOPENAI_API_KEY=local-fixture-value\n'
         'OPENAI_MODEL=gpt-6.1-sol\nOPENAI_REASONING_EFFORT=medium\n',
         encoding="utf-8-sig",
     )
@@ -48,7 +48,7 @@ def test_agent_rejects_input_capacity_that_differs_from_checkpoint(engine, chang
     baseline = engine.predict(["BRUUNS"], context)["items"][0]["predicted_available"]
     try:
         engine.prepared.splits[changed_garage]["train"].capacity *= 2
-        with pytest.raises(ValueError, match="容量.*检查点不一致"):
+        with pytest.raises(ValueError, match="capacity.*checkpoint"):
             engine.predict(["BRUUNS"], context)
     finally:
         engine.prepared.splits[changed_garage]["train"].capacity = original
@@ -64,7 +64,7 @@ def test_session_setup_exception_has_terminal_failure_and_event(tmp_path, monkey
             raise ValueError("injected session setup failure")
 
         monkeypatch.setattr(runtime.memory, "artifacts", fail)
-        task = runtime.submit(session["id"], "检查历史", session["context"])
+        task = runtime.submit(session["id"], "Inspect history", session["context"])
         deadline = time.monotonic() + 3
         while runtime.memory.task(task)["status"] in ("queued", "running") and time.monotonic() < deadline:
             time.sleep(.01)

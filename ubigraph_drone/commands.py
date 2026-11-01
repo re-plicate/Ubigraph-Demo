@@ -33,4 +33,4 @@ def manifest(plan):
             append('LAND', height_m=0)
         else:
             append('HOLD_POSITION', height_m=HEIGHT)
-    return {'format': 'ubigraph.flight.v1', 'backend': 'simulation', 'coordinate_frame': 'synthetic-grid-metres', 'plan_id':plan['id'], 'feasible':plan['feasible'], 'commands':commands, 'note':'声明式动作清单；执行器按已验证的时空航线运行。不是MAVLink数据包，不连接真实飞行器。'}
+    return {'format': 'ubigraph.flight.v1', 'backend': 'simulation', 'coordinate_frame': 'synthetic-grid-metres', 'plan_id':plan['id'], 'feasible':plan['feasible'], 'commands':commands, 'note':'A declarative action manifest. The executor follows validated space-time routes. This is not a MAVLink packet and does not connect to a physical aircraft.'}

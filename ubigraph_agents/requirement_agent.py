@@ -4,9 +4,9 @@ Uses an LLM (OpenAI-compatible API) to parse natural language.
 If no API key is set, falls back to rule-based keyword matching.
 
 Set your key via environment variable:
-    CITYCLAW_LLM_KEY=sk-...
-    CITYCLAW_LLM_BASE=https://api.openai.com/v1  (or any OpenAI-compatible endpoint)
-    CITYCLAW_LLM_MODEL=gpt-4o-mini
+    UBIGRAPH_LLM_KEY=sk-...
+    UBIGRAPH_LLM_BASE=https://api.openai.com/v1  (or any OpenAI-compatible endpoint)
+    UBIGRAPH_LLM_MODEL=gpt-4o-mini
 """
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ Available agents and actions:
 - hic.evaluate: evaluate prediction uncertainty and decide if human review needed
 """
 
-SYSTEM_PROMPT = f"""You are the Requirement Agent in the CityClaw parking prediction system.
+SYSTEM_PROMPT = f"""You are the Requirement Agent in the UbiGraph parking prediction system.
 Given a user's natural language query, decide which agents to call and in what order.
 
 {SKILLS_CATALOG}
@@ -55,9 +55,9 @@ class RequirementAgent(Agent):
 
     def _call_llm(self, user_query: str) -> list[dict] | None:
         """Call OpenAI-compatible LLM. Returns parsed skills or None on failure."""
-        api_key = os.environ.get("CITYCLAW_LLM_KEY")
-        base_url = os.environ.get("CITYCLAW_LLM_BASE", "https://api.openai.com/v1").rstrip("/")
-        model = os.environ.get("CITYCLAW_LLM_MODEL", "gpt-4o-mini")
+        api_key = os.environ.get("UBIGRAPH_LLM_KEY")
+        base_url = os.environ.get("UBIGRAPH_LLM_BASE", "https://api.openai.com/v1").rstrip("/")
+        model = os.environ.get("UBIGRAPH_LLM_MODEL", "gpt-4o-mini")
 
         if not api_key:
             return None
@@ -98,15 +98,15 @@ class RequirementAgent(Agent):
         """Rule-based fallback when no LLM is available."""
         text_lower = text.lower()
         skills = []
-        if any(k in text_lower for k in ["预测", "prediction", "还有多少", "车位", "available", "停"]):
+        if any(k in text_lower for k in ['Forecast', "prediction", 'how many remain', 'spaces', "available", 'Stop']):
             skills.append({"agent": "temporal", "action": "predict"})
-        if any(k in text_lower for k in ["相似", "neighbor", "哪里像", "spatial", "像哪个"]):
+        if any(k in text_lower for k in ['Similar', "neighbor", 'similar where', "spatial", 'similar to which']):
             skills.append({"agent": "spatial", "action": "neighbors"})
-        if any(k in text_lower for k in ["掉了", "坏了", "掉线", "fail", "sensor", "故障"]):
+        if any(k in text_lower for k in ['Dropped', 'Broken', 'Offline', "fail", "sensor", 'Fault']):
             skills.append({"agent": "drone", "action": "plan"})
             skills.append({"agent": "detection", "action": "detect"})
             skills.append({"agent": "transfer", "action": "transfer_predict"})
-        if any(k in text_lower for k in ["sfpark", "london", "跨城", "transfer", "迁移", "新城市"]):
+        if any(k in text_lower for k in ["sfpark", "london", 'Cross-city', "transfer", 'Transfer', 'New city']):
             skills.append({"agent": "transfer", "action": "transfer_predict"})
         if not skills:
             skills.append({"agent": "temporal", "action": "predict"})
@@ -114,7 +114,7 @@ class RequirementAgent(Agent):
 
     def _parse(self, env: Envelope) -> dict:
         query = env.payload.get("query", "")
-        use_llm = bool(os.environ.get("CITYCLAW_LLM_KEY"))
+        use_llm = bool(os.environ.get("UBIGRAPH_LLM_KEY"))
 
         skills = None
         if use_llm:
@@ -122,9 +122,9 @@ class RequirementAgent(Agent):
 
         if skills is None:
             skills = self._fallback_rules(query)
-            source = "rule-based (set CITYCLAW_LLM_KEY to enable LLM)"
+            source = "rule-based (set UBIGRAPH_LLM_KEY to enable LLM)"
         else:
-            source = f"LLM ({os.environ.get('CITYCLAW_LLM_MODEL', 'gpt-4o-mini')})"
+            source = f"LLM ({os.environ.get('UBIGRAPH_LLM_MODEL', 'gpt-4o-mini')})"
 
         return {
             "original_query": query,

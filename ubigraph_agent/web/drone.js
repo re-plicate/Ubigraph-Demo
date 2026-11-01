@@ -92,7 +92,7 @@
   function renderEvents() {
     const events=fleet.events.filter(e=>!selection||e.mission_id===selection||!e.mission_id).slice(-24).reverse();
     q('#drone-events').innerHTML=events.length?events.map(e=>{
-      let text=e.message.replace(/(\d+)\s*entered\s*(.+?)\s*Stage/g,'Drone $1 · $2').replace(/(\d+)\s*reached\s*(G\d+)[，, ]+Start simulated collection/g,'Drone $1 reached $2 · Collection started').replace(/(G\d+)\s*Simulated collection completed/g,'$1 · Collection completed');Object.entries(labels).forEach(([a,b])=>{text=text.replace(a,b);});
+      let text=e.message.replace(/(\d+)\s*entered\s*(.+?)\s*Stage/g,'Drone $1 · $2').replace(/(\d+)\s*reached\s*(G\d+)[, , ]+Start simulated collection/g,'Drone $1 reached $2 · Collection started').replace(/(G\d+)\s*Simulated collection completed/g,'$1 · Collection completed');Object.entries(labels).forEach(([a,b])=>{text=text.replace(a,b);});
       return `<div class="drone-event"><time>${clock(e.sim_time)}</time><span>${h(text)}</span></div>`;
     }).join(''):'<p class="muted small">Waiting for execution events.</p>';
   }
@@ -126,7 +126,7 @@
       ctx.beginPath();ctx.moveTo(-5,-5);ctx.lineTo(5,5);ctx.moveTo(-5,5);ctx.lineTo(5,-5);ctx.stroke();
       for(const [a,b] of [[-5,-5],[-5,5],[5,-5],[5,5]]){ctx.beginPath();ctx.arc(a,b,3.3,0,2*Math.PI);ctx.fill();ctx.stroke();}
       ctx.beginPath();ctx.arc(0,0,3,0,2*Math.PI);ctx.fillStyle=d.fault?'#bd655a':colors[d.id];ctx.fill();ctx.restore();
-      ctx.fillStyle=colors[d.id];ctx.font='bold 9px system-ui';ctx.fillText(d.id+'No.',x+15,y+3);
+      ctx.fillStyle=colors[d.id];ctx.font='bold 9px system-ui';ctx.fillText('D'+d.id,x+15,y+3);
     });
   }
 
@@ -137,7 +137,7 @@
   });
   function showPlan(p) {
     if(p.command_manifest)window.dispatchEvent(new CustomEvent("ubigraph-command-manifest",{detail:p.command_manifest}));
-    q('#drone-plan-result').innerHTML=p.feasible?`<strong>Feasible plan · Estimated ${p.duration_seconds.toFixed(0)} seconds</strong><br>${Object.entries(p.routes).map(([id,r])=>`${h(id)}No. → ${r.targets.map(h).join(' → ')}`).join('<br>')}<br>Estimated horizontal distance ${p.distance_m.toFixed(1)}m；Not executed yet.<br>Collection dwell rounds up to 2 -second time slots (rounded up).`:`<strong>Infeasible plan</strong><br>${p.rejected.map(r=>h(r.target+'：'+r.reason)).join('<br>')}`;
+    q('#drone-plan-result').innerHTML=p.feasible?`<strong>Feasible plan · Estimated ${p.duration_seconds.toFixed(0)} seconds</strong><br>${Object.entries(p.routes).map(([id,r])=>`Drone ${h(id)} → ${r.targets.map(h).join(' → ')}`).join('<br>')}<br>Estimated horizontal distance ${p.distance_m.toFixed(1)}m; Not executed yet.<br>Collection dwell rounds up to 2-second time slots.`:`<strong>Infeasible plan</strong><br>${p.rejected.map(r=>h(r.target+': '+r.reason)).join('<br>')}`;
     refreshButtons();draw();
   }
   q('#drone-start').onclick=()=>action(q('#drone-start'),async()=>{const m=await request('start',{plan_id:plan.id});selection=m.id;followLatest=true;plan=null;q('#drone-plan-result').textContent='Mission submitted. Progress and collection receipts update live.';toast('Mission submitted. Track live flight progress.');render(await request('state'));window.dispatchEvent(new CustomEvent("ubigraph-drone-artifact",{detail:m}));});

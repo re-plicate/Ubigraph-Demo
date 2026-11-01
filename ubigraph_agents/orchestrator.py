@@ -65,6 +65,6 @@ class OrchestratorAgent(Agent):
                 if "error" in mission:
                     out["error"] = mission["error"]
                 # In a real run the orchestrator would wait for receipts; here we
-                # record that the补采 was dispatched (evidence chain).
-                out["note"] = "模拟任务提交结果见 drone_mission；无真实测量入库，未进行二次预测"
+                # record that simulated collection was dispatched (evidence chain).
+                out["note"] = 'See drone_mission for the simulated mission submission. No measured observations were stored and no second forecast was performed.'
         return out

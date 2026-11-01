@@ -26,6 +26,7 @@ class AgentConfig:
     base_url: str = "https://api.openai.com/v1"
     model: str = "gpt-6.1-sol"
     reasoning_effort: str = "medium"
+    api_style: str = "auto"
     host: str = "127.0.0.1"
     port: int = 8765
     run_dir: Path = ROOT / "models/parking"
@@ -43,14 +44,22 @@ class AgentConfig:
                   base_url=values.get("OPENAI_BASE_URL", cls.base_url).rstrip("/"),
                   model=values.get("OPENAI_MODEL") or cls.model,
                   reasoning_effort=values.get("OPENAI_REASONING_EFFORT") or cls.reasoning_effort,
+                  api_style=values.get("UBIGRAPH_API_STYLE", "auto"),
                   host=values.get("UBIGRAPH_AGENT_HOST", "127.0.0.1"),
                   port=int(values.get("UBIGRAPH_AGENT_PORT", "8765")),
                   run_dir=ROOT / values.get("UBIGRAPH_RUN_DIR", "models/parking"))
         if not cfg.base_url.startswith(("https://", "http://localhost", "http://127.0.0.1")):
             raise ValueError("Model endpoint must be HTTPS, or localhost for testing")
         if cfg.reasoning_effort not in ("low", "medium", "high", "xhigh", "max"):
-            raise ValueError("OPENAI_REASONING_EFFORT需为low、medium、high、xhigh或max")
+            raise ValueError('OPENAI_REASONING_EFFORT must be low, medium, high, xhigh, or max')
+        if cfg.api_style not in ("auto", "responses", "chat_completions"):
+            raise ValueError("UBIGRAPH_API_STYLE must be auto, responses, or chat_completions")
         return cfg
+
+    def wire_api(self):
+        if self.api_style != "auto":
+            return self.api_style
+        return "chat_completions" if "api.deepseek.com" in self.base_url else "responses"
 
     def redact(self, value):
         value = str(value)
@@ -60,5 +69,5 @@ class AgentConfig:
 
     def public(self):
         return {"base_url": self.base_url, "model": self.model, "configured": bool(self.api_key),
-                "reasoning_effort": self.reasoning_effort, "wire_api": "responses", "acquisition_enabled": False,
+                "reasoning_effort": self.reasoning_effort, "wire_api": self.wire_api(), "acquisition_enabled": False,
                 "drone_simulation_enabled": True, "hardware_control_enabled": False}

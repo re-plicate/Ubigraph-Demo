@@ -41,7 +41,7 @@ class DroneService:
             self._lease.execute("BEGIN EXCLUSIVE")
         except sqlite3.OperationalError:
             self._lease.close()
-            raise ValueError("模拟运行目录已被另一实例使用，请复用已启动的服务或使用不同运行目录") from None
+            raise ValueError('Simulation runtime directory is in use. Reuse the running service or select another runtime directory.') from None
         try:
             self._restore()
             self._save()
@@ -66,7 +66,7 @@ class DroneService:
             for mission in self.missions.values():
                 if mission["status"] not in TERMINAL:
                     mission["status"] = "interrupted"
-                    mission["reason"] = "服务重启：模拟任务中断，未续飞；模拟无人机已置于地面"
+                    mission["reason"] = 'Service restarted: simulation interrupted without resuming flights; simulated drones placed on ground'
                     mission["finished_sim_time"] = self.sim_time
                     mission["actual_duration_seconds"] = max(0., self.sim_time - mission["started_sim_time"])
                     for route in mission["routes"].values():
@@ -77,7 +77,7 @@ class DroneService:
                 d.z, d.mission_id, d.velocity = 0., None, [0., 0., 0.]
                 d.status = "fault" if d.fault else "idle"
             self.revision += 1  # recovery changes poses, so unstarted plans must be regenerated
-            self._event("recovered", "服务重启，未完成任务保留为中断，模拟机置地", save=False)
+            self._event("recovered", 'Service restarted. Incomplete missions are marked interrupted; simulated drones are on the ground.', save=False)
 
     def _db(self):
         return sqlite3.connect(self.db_path)
@@ -107,7 +107,7 @@ class DroneService:
                 "last_error": self.last_error, "worker_running": bool(self.thread and self.thread.is_alive()),
                 "fleet": [d.public() for d in self.drones.values()],
                 "missions": list(self.missions.values())[-20:], "events": self.events[-80:],
-                "note": "模拟任务执行；目标由外部给定，不判断补采必要性；未连接真实无人机或写入V3观测。"}
+                "note": 'Simulated missions use externally supplied targets. No physical hardware or V3 observation writeback is connected.'}
 
     def snapshot(self, compact=False):
         with self.lock:
@@ -120,25 +120,25 @@ class DroneService:
 
     def _free(self, allow_error=False):
         if self.stopping.is_set():
-            raise ValueError("模拟服务已关闭")
+            raise ValueError('Simulation service closed')
         if self.last_error and not allow_error:
-            raise ValueError("模拟器执行异常，请先重置场景")
+            raise ValueError('Simulator execution error. Reset the scene first.')
         if self.active:
-            raise ValueError("已有飞行任务占用模拟空域，请查询或取消该任务")
+            raise ValueError('A mission already occupies the simulated airspace. Check or cancel it first.')
 
     @staticmethod
     def _request(value):
         if not isinstance(value, str) or not 1 <= len(value) <= 80 or any(ord(c) < 32 for c in value):
-            raise ValueError("request_id需要1至80个可显示字符，用于去重")
+            raise ValueError('request_id must contain 1 to 80 printable characters for deduplication')
         return value
 
     def _selected(self, values):
         if not isinstance(values, list) or not values or len(values) > 3:
-            raise ValueError("请选择1至3个不重复的无人机编号")
+            raise ValueError('Select 1 to 3 distinct drone IDs')
         if any(not isinstance(k, str) or k not in self.drones for k in values):
-            raise ValueError("未知无人机；可选1、2、3")
+            raise ValueError('Unknown drone. Valid IDs are 1, 2, and 3')
         if len(set(values)) != len(values):
-            raise ValueError("无人机编号不能重复")
+            raise ValueError('Drone IDs must be distinct')
         return [self.drones[k] for k in sorted(values)]
 
     def _cached_request(self, request_id, payload):
@@ -146,7 +146,7 @@ class DroneService:
         for plan in self.plans.values():
             if plan["request_id"] == request_id:
                 if plan["payload_hash"] != digest:
-                    raise ValueError("同一个request_id已用于不同内容，请使用新的请求编号")
+                    raise ValueError('This request_id was already used with different content. Use a new request ID.')
                 return digest, copy.deepcopy(plan)
         return digest, None
 
@@ -154,19 +154,19 @@ class DroneService:
         with self.lock:
             self._request(request_id)
             if type(return_to_base) is not bool:
-                raise ValueError("return_to_base必须为布尔值")
-            dwell_seconds = number(dwell_seconds, "采集持续时间", 0, 30)
+                raise ValueError('return_to_base must be a boolean')
+            dwell_seconds = number(dwell_seconds, 'Collection duration', 0, 30)
             if not isinstance(targets, list) or not 1 <= len(targets) <= 8:
-                raise ValueError("请提供1至8个目标节点")
+                raise ValueError('Provide 1 to 8 target nodes')
             targets = [node_id(k) for k in targets]
             if len(set(targets)) != len(targets):
-                raise ValueError("目标不能重复（停车场别名与网格也不能重复）")
+                raise ValueError('Duplicate targets are not allowed, including garage aliases and grid IDs')
             priority_targets = [] if priority_targets is None else priority_targets
             if not isinstance(priority_targets, list):
-                raise ValueError("优先目标必须是数组")
+                raise ValueError('Priority targets must be an array')
             priority = [node_id(k) for k in priority_targets]
             if len(set(priority)) != len(priority) or not set(priority).issubset(targets):
-                raise ValueError("优先目标必须是不重复的本次目标子集")
+                raise ValueError('Priority targets must be a distinct subset of selected targets')
             ids = [d.id for d in self._selected(list(self.drones) if drone_ids is None else drone_ids)]
             payload = {"targets": targets, "drone_ids": ids, "priority_targets": priority,
                        "dwell_seconds": dwell_seconds, "return_to_base": return_to_base}
@@ -184,7 +184,7 @@ class DroneService:
                     energy = energy_requirements(routes, list(self.drones.values()))
                     for key, need in energy.items():
                         if self.drones[key].battery - need < RESERVE:
-                            raise ValueError(f"{key}号在包含等待的计划中返航电量不足")
+                            raise ValueError(f"Drone {key} has insufficient return battery in the plan including waits")
                 except ValueError as exc:
                     rejected = [{"target": "plan", "reason": str(exc)}]
             plan = {"kind": "drone_plan", "id": identity("plan"), "request_id": request_id,
@@ -195,17 +195,17 @@ class DroneService:
                     "energy_required_percent": energy,
                     "duration_seconds": max((r["duration_seconds"] for r in routes.values()), default=0),
                     "distance_m": sum(r["distance_m"] for r in routes.values()),
-                    "algorithm": "外部优先顺序 + 预计完成时间分配 + 时空A*与顶点/反向边预留",
-                    "note": "此计划未起飞；时长、电量为运动仿真估计。优先级影响分配顺序，不承诺全局完成先后。"}
+                    "algorithm": 'External priorities, estimated-completion-time assignment, and space-time A* with vertex and reverse-edge reservations',
+                    "note": 'No takeoff yet. Duration and battery are motion-simulation estimates. Priority affects assignment order, not guaranteed completion order.'}
             plan["command_manifest"] = manifest(plan)
             self.plans[plan["id"]] = plan
-            self._event("planned", "已生成任务计划" if plan["feasible"] else "规划不可行：请查看拒绝原因")
+            self._event("planned", 'Mission plan generated' if plan["feasible"] else 'Planning infeasible. See rejection reasons.')
             return copy.deepcopy(plan)
 
     def command_manifest(self, plan_id):
         with self.lock:
             if plan_id not in self.plans:
-                raise ValueError("计划不存在")
+                raise ValueError('Plan not found')
             plan = self.plans[plan_id]
             value = copy.deepcopy(plan.get("command_manifest") or manifest(plan))
             value["stale"] = plan["epoch"] != self.epoch or plan["revision"] != self.revision
@@ -215,25 +215,25 @@ class DroneService:
     def start(self, plan_id):
         with self.lock:
             if plan_id not in self.plans:
-                raise ValueError("计划不存在，请先规划")
+                raise ValueError('Plan not found. Generate a plan first.')
             plan = self.plans[plan_id]
             for m in self.missions.values():
                 if m["plan_id"] == plan_id:
                     return self._mission(m["id"])
             self._free()
             if plan["epoch"] != self.epoch or plan["revision"] != self.revision:
-                raise ValueError("计划已过期：机队状态已变化，请使用新的request_id重新规划")
+                raise ValueError('The plan is stale because fleet state changed. Replan with a new request_id.')
             if not plan["feasible"]:
-                raise ValueError("计划不可行，不能执行；请查看rejected原因")
+                raise ValueError('The plan is infeasible and cannot execute. Inspect the rejection reasons.')
             energy = energy_requirements(plan["routes"], list(self.drones.values()), plan["mode"] not in ("return", "land"))
             for key, need in energy.items():
                 d = self.drones[key]
                 if d.fault or not d.connected or (plan["mode"] not in ("return", "land") and d.battery - need < RESERVE):
-                    raise ValueError("提交前检查失败：无人机状态或返航电量发生变化，请重新规划")
+                    raise ValueError('Preflight check failed: drone state or return battery changed. Generate a new plan.')
             mid = identity("mission")
             mission = {"kind": "drone_mission", "id": mid, "request_id": plan["request_id"],
                        "plan_id": plan_id, "epoch": self.epoch, "mode": plan["mode"],
-                       "status": "running", "reason": "任务已接收，正在模拟执行",
+                       "status": "running", "reason": 'Mission accepted; simulation running',
                        "targets": plan["targets"], "routes": copy.deepcopy(plan["routes"]),
                        "started_sim_time": self.sim_time, "segment_start": self.sim_time,
                        "duration_seconds": plan["duration_seconds"], "planned_distance_m": plan["distance_m"],
@@ -244,14 +244,14 @@ class DroneService:
             for key in mission["routes"]:
                 self.drones[key].mission_id = mid
             self.revision += 1
-            self._event("started", "模拟任务已启动；完成情况以执行回执为准", mid)
+            self._event("started", 'Simulation mission started. Completion is determined by execution receipts.', mid)
             return self._mission(mid)
 
     def _mission(self, mid):
         if mid == "latest":
             mid = self.active or next(reversed(self.missions), None)
         if not mid or mid not in self.missions:
-            raise ValueError("任务不存在")
+            raise ValueError('Task not found')
         value = copy.deepcopy(self.missions[mid])
         value["events"] = [e for e in self.events if e["mission_id"] == mid][-100:]
         return value
@@ -260,7 +260,7 @@ class DroneService:
         with self.lock:
             return self._mission(mid)
 
-    def cancel(self, mid, reason="用户取消后续访问，准备返航"):
+    def cancel(self, mid, reason='User cancelled remaining visits; preparing return'):
         with self.lock:
             m = self.missions[self._mission(mid)["id"]]
             if m["status"] in TERMINAL or m["cancel_at"] is not None or m["status"] == "returning":
@@ -275,17 +275,17 @@ class DroneService:
         m["status"], m["cancel_reason"] = "cancelling", reason
         m["final_status"] = "failed" if failed or m["final_status"] == "failed" else "cancelled"
         self.paused = False
-        m["reason"] = reason + "；完成当前路段后重新规划返航"
+        m["reason"] = reason + '; replan the return route after completing the current segment'
         self._event("cancel_requested", m["reason"], m["id"])
 
     def control(self, request_id, drone_id, action, target="NONE", height=HEIGHT, duration_seconds=3.):
         with self.lock:
             self._request(request_id)
             drone = self._selected([drone_id])[0]
-            height = number(height, "高度", .2, 1.)
-            duration_seconds = number(duration_seconds, "悬停时间", 0, 30)
+            height = number(height, 'Altitude', .2, 1.)
+            duration_seconds = number(duration_seconds, 'Hover duration', 0, 30)
             if action not in ("takeoff", "navigate", "hover", "return", "land"):
-                raise ValueError("不支持的动作：takeoff/navigate/hover/return/land")
+                raise ValueError('Unsupported action. Use takeoff, navigate, hover, return, or land.')
             target_id = node_id(target) if action == "navigate" else None
             payload = {"mode": action, "drone_id": drone_id, "target": target_id,
                        "height": height, "duration_seconds": duration_seconds}
@@ -294,18 +294,18 @@ class DroneService:
                 return self.start(old["id"])
             self._free()
             if drone.fault or not drone.connected:
-                raise ValueError("该无人机故障或未连接，请先恢复模拟状态")
+                raise ValueError('Drone faulted or disconnected. Restore simulation state first.')
             if action == "takeoff" and drone.z > .05:
-                raise ValueError("该无人机已在空中")
+                raise ValueError('Drone is already airborne')
             if action != "takeoff" and drone.z < .05:
-                raise ValueError("该无人机在地面，请先起飞")
+                raise ValueError('Drone is on the ground. Take off first.')
             routes = build_routes([drone], {drone_id: [target_id] if target_id else []}, duration_seconds,
                                   action == "return", list(self.drones.values()), mode=action,
                                   height=height if action == "takeoff" else drone.z)
             route = routes[drone_id]
             energy = energy_requirements(routes, list(self.drones.values()), action not in ("return", "land"))
             if action not in ("return", "land") and any(self.drones[k].battery - need < RESERVE for k, need in energy.items()):
-                raise ValueError("模拟电量不足，需保留返航余量")
+                raise ValueError('Insufficient simulated battery; return reserve required')
             plan = {"kind": "drone_plan", "id": identity("plan"), "request_id": request_id,
                     "payload_hash": digest, "epoch": self.epoch, "revision": self.revision,
                     "feasible": True, "rejected": [], "routes": routes, "mode": action,
@@ -318,10 +318,10 @@ class DroneService:
     def settings(self, paused=None, speed=None):
         with self.lock:
             if paused is not None and type(paused) is not bool:
-                raise ValueError("paused必须为布尔值")
+                raise ValueError('paused must be a boolean')
             if paused is False and self.last_error:
-                raise ValueError("模拟器执行异常，请先重置场景再继续")
-            checked_speed = self.speed if speed is None else number(speed, "仿真倍速", .5, 16)
+                raise ValueError('Simulator execution error. Reset the scene before continuing.')
+            checked_speed = self.speed if speed is None else number(speed, 'Simulation speed', .5, 16)
             if paused is not None:
                 self.paused = paused
             self.speed = checked_speed
@@ -332,25 +332,25 @@ class DroneService:
     def configure_drone(self, drone_id, battery=None, fault=None):
         with self.lock:
             d = self._selected([drone_id])[0]
-            checked_battery = d.battery if battery is None else number(battery, "模拟电量", 0, 100)
+            checked_battery = d.battery if battery is None else number(battery, 'Simulated battery', 0, 100)
             if fault is not None:
                 if type(fault) is not bool:
-                    raise ValueError("fault必须为布尔值")
+                    raise ValueError('fault must be a boolean')
                 if not fault and self.active:
-                    raise ValueError("请等待当前任务终止后再恢复故障机")
+                    raise ValueError('Wait for the current mission to terminate before restoring a faulted drone')
             d.battery = checked_battery
             if fault is not None:
-                d.fault = "模拟故障" if fault else None
+                d.fault = 'Simulated fault' if fault else None
             self.revision += 1
             if self.active and d.mission_id == self.active and (d.fault or d.battery < RESERVE):
                 m = self.missions[self.active]
                 if d.fault:
                     m["fault_drone"] = d.id
                     m["fault_drone_ids"] = sorted(set(m.get("fault_drone_ids", [])) | {d.id})
-                self._request_return(m, "模拟故障或低电量：停止采集并处理返航", failed=True)
+                self._request_return(m, 'Simulated fault or low battery: stop collection and handle return', failed=True)
             elif d.mission_id is None:
                 d.status = "fault" if d.fault else ("hovering" if d.z > .05 else "idle")
-            self._event("fleet_changed", f"{d.id}号模拟状态已更新", drone_id=d.id)
+            self._event("fleet_changed", f"Drone {d.id} simulation state updated", drone_id=d.id)
             return self.snapshot()
 
     def reset(self):
@@ -361,7 +361,7 @@ class DroneService:
             self.last_error = None
             self.revision += 1
             self.epoch = identity("scene")
-            self._event("reset", "模拟场景已重置；原任务记录保留")
+            self._event("reset", 'Simulation scene reset. Mission records preserved.')
             return self.snapshot()
 
     @staticmethod
@@ -389,7 +389,7 @@ class DroneService:
             if d.fault:
                 # Explicit simulation fault injection, not a successful landing command.
                 d.z, d.velocity, d.status, d.mission_id = 0., [0., 0., 0.], "fault", None
-                self._event("fault", "模拟故障机停止并置地，未完成采集", m["id"], key)
+                self._event("fault", 'Faulted simulated drone stopped and placed on ground; collection incomplete', m["id"], key)
             elif d.z < .05:
                 # A shorter route may already have landed. Cancellation never relaunches it.
                 d.z, d.velocity, d.status, d.mission_id = 0., [0., 0., 0.], "idle", None
@@ -399,12 +399,12 @@ class DroneService:
         try:
             m["routes"] = build_routes(good, {}, 0, True, list(self.drones.values()), mode="return")
             m["segment_start"], m["cancel_at"], m["status"] = self.sim_time, None, "returning"
-            m["reason"] = m["cancel_reason"] + "；正在返航，尚未结束"
+            m["reason"] = m["cancel_reason"] + '; returning to base; the mission has not finished'
             self._event("returning", m["reason"], m["id"])
         except ValueError as exc:
             for d in good:
                 d.z, d.velocity = 0., [0., 0., 0.]
-            m["reason"] = f"返航规划失败，模拟机停止并置地：{exc}"
+            m["reason"] = f"Return planning failed. Simulated drone stopped and placed on ground:{exc}"
             m["failure_reason"] = m["reason"]
             self._finish(m, "failed")
 
@@ -412,7 +412,7 @@ class DroneService:
         m["status"], m["finished_sim_time"] = status, self.sim_time
         m["actual_duration_seconds"] = self.sim_time - m["started_sim_time"]
         if status == "completed":
-            m["reason"] = "模拟任务完成；采集回执为动作演示，不含停车观测数值" if m["mode"] == "collection" else "模拟控制动作完成"
+            m["reason"] = 'Simulation complete. Collection receipts describe actions and contain no measured parking availability.' if m["mode"] == "collection" else 'Simulated control action completed'
         elif status == "cancelled":
             m["reason"] = m.get("cancel_reason") or m["reason"]
         else:
@@ -454,37 +454,37 @@ class DroneService:
                 m["distance_m"] += d.distance - old
                 if d.status != phase:
                     d.status = phase
-                    self._event("phase", f"{key}号进入{phase}阶段", m["id"], key, save=False)
+                    self._event("phase", f"Drone {key} entered the {phase} phase", m["id"], key, save=False)
             self.sim_time += dt
             elapsed += dt
             if any(d.battery <= 0 and d.z > .05 for d in self.drones.values()):
-                self._fail_and_land(m, "模拟电量耗尽，停止并置地；未宣称正常返航")
+                self._fail_and_land(m, 'Simulated battery depleted. Stopped and placed on ground; normal return not claimed.')
                 return
             if m["status"] == "running":
                 for key, route in m["routes"].items():
                     for job in route["jobs"]:
                         if job["status"] == "pending" and elapsed + 1e-7 >= job["arrival_tick"] * SLOT:
                             if not self._at(self.drones[key], route["path"][job["arrival_tick"]]):
-                                self._fail_and_land(m, "未实际到达目标，拒绝生成到达/采集回执")
+                                self._fail_and_land(m, 'The drone has not reached the target; no arrival or collection receipt can be issued.')
                                 return
                             job["status"] = "collecting"
-                            self._event("arrived", f"{key}号到达{job['node']}，开始模拟采集", m["id"], key, job["node"], save=False)
+                            self._event("arrived", f"Drone {key} reached {job['node']}; starting simulated collection", m["id"], key, job["node"], save=False)
                         if job["status"] == "collecting" and elapsed + 1e-7 >= job["end_tick"] * SLOT:
                             if not self._at(self.drones[key], route["path"][job["end_tick"]]):
-                                self._fail_and_land(m, "采集结束时未保持目标位置，拒绝生成成功回执")
+                                self._fail_and_land(m, 'Drone did not hold target position at collection end. Success receipt refused.')
                                 return
                             job["status"] = "completed"
                             receipt = {"node": job["node"], "drone_id": key, "status": "completed",
                                        "source": "simulated_action_receipt", "measurement": None,
                                        "observed_at": None, "completed_sim_time": round(self.sim_time, 3),
-                                       "note": "仅模拟到点采集动作，未生成或写入停车观测"}
+                                       "note": 'Only simulated collection actions; no parking observations are generated or stored'}
                             job["receipt"] = receipt
                             m["receipts"].append(receipt)
                             m["completed_targets"].append(job["node"])
-                            self._event("collected", f"{job['node']}模拟采集完成", m["id"], key, job["node"], save=False)
+                            self._event("collected", f"Simulated collection completed at {job['node']}", m["id"], key, job["node"], save=False)
                 low = [d.id for d in self.drones.values() if d.z > .05 and not d.fault and d.battery < RESERVE]
                 if low and m["mode"] not in ("return", "land"):
-                    self._request_return(m, "空中机电量降至返航保留线，停止后续采集", failed=True)
+                    self._request_return(m, 'Airborne drone reached return-battery reserve; further collection stopped', failed=True)
             active_drones = [d for d in self.drones.values() if d.z > .05 or d.mission_id]
             for i, a in enumerate(active_drones):
                 for b in active_drones[i + 1:]:
@@ -494,7 +494,7 @@ class DroneService:
                         for d in active_drones:
                             d.z, d.velocity = 0., [0., 0., 0.]
                             d.status = "fault" if d.fault else "idle"
-                        self._fail_and_land(m, "模拟运行时发现间距冲突，停止并置地；未宣称正常完成")
+                        self._fail_and_land(m, 'Separation conflict during simulation. Stopped and placed on ground; completion not claimed.')
                         return
             if m["cancel_at"] is not None and elapsed + 1e-7 >= m["cancel_at"]:
                 self._begin_return(m)
@@ -502,7 +502,7 @@ class DroneService:
             end = max((r["duration_seconds"] for r in m["routes"].values()), default=0)
             if elapsed + 1e-7 >= end:
                 if any(not self._at(self.drones[key], r["path"][-1]) for key, r in m["routes"].items()):
-                    self._fail_and_land(m, "控制器未达到最终位置，不能标记任务完成")
+                    self._fail_and_land(m, 'Controller has not reached the final position. Mission cannot be marked complete.')
                     return
                 self._finish(m, m["final_status"] or "completed")
         else:
@@ -518,9 +518,9 @@ class DroneService:
                     self.control(identity("lowbattery"), low.id, "return")
                 except ValueError as exc:
                     low.z, low.velocity, low.status = 0., [0., 0., 0.], "fault"
-                    low.fault = "自动返航失败"
+                    low.fault = 'Automatic return failed'
                     self.revision += 1
-                    self._event("fault", f"{low.id}号自动返航不可行，模拟置地：{exc}", drone_id=low.id)
+                    self._event("fault", f"Drone {low.id} cannot return automatically; placed on simulated ground: {exc}", drone_id=low.id)
 
     def advance(self, seconds):
         """Deterministic simulation clock for acceptance tests; not a public HTTP command."""
@@ -549,8 +549,8 @@ class DroneService:
                     if self.last_error != reason:
                         self.last_error = reason
                         if self.active:
-                            self._fail_and_land(self.missions[self.active], "模拟执行器异常，停止并置地：" + reason, persist=False)
-                        self._event("engine_error", "模拟器已暂停：" + reason, save=False)
+                            self._fail_and_land(self.missions[self.active], 'Simulator error; stopped and placed on ground:' + reason, persist=False)
+                        self._event("engine_error", 'Simulator paused:' + reason, save=False)
                     self.paused, accumulator, saved = True, 0., now
                     try:
                         self._save()

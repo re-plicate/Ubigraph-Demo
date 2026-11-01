@@ -25,3 +25,18 @@ outputs/
 *.mp4
 *.zip
 results/agent_io_log.json
+
+# Research stays local; this repository ships the runnable demo.
+/scripts/
+/results/
+/research/
+/configs/
+/data/evaluation/
+/models/parking/prepared/
+/models/parking/seed_*/without_*/
+/models/parking/fewshot_config.json
+/run_st.sh
+*.xlsx
+*.tex
+# The product walkthrough is intentionally versioned.
+!docs/media/*.mp4

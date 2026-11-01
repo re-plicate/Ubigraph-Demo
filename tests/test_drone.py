@@ -96,11 +96,11 @@ def test_idempotency_stale_plans_busy_airspace_and_priority_boundary(fleet):
     p = fleet.plan("same", ["G1","G3"], priority_targets=["G3"])
     assert p["targets"] == ["G3","G1"]
     assert fleet.plan("same", ["G1","G3"], priority_targets=["G3"])["id"] == p["id"]
-    with pytest.raises(ValueError,match="不同内容"):
+    with pytest.raises(ValueError,match="different content"):
         fleet.plan("same", ["G2"])
     m = fleet.start(p["id"])
     assert fleet.start(p["id"])["id"] == m["id"]
-    with pytest.raises(ValueError,match="空域"):
+    with pytest.raises(ValueError,match="airspace"):
         fleet.plan("busy", ["G2"])
     with pytest.raises(ValueError):
         fleet.reset()
@@ -108,7 +108,7 @@ def test_idempotency_stale_plans_busy_airspace_and_priority_boundary(fleet):
     assert fleet.start(p["id"])["status"] == "completed"  # never dispatch twice
     p = fleet.plan("stale", ["G4"])
     fleet.configure_drone("1",battery=50)
-    with pytest.raises(ValueError,match="过期"):
+    with pytest.raises(ValueError,match="stale"):
         fleet.start(p["id"])
 
 
@@ -120,7 +120,7 @@ def test_low_battery_exclusion_infeasible_plan_and_late_submission_check(fleet):
         fleet.configure_drone(key,battery=18)
     p = fleet.plan("none",["G4"])
     assert not p["feasible"] and p["rejected"]
-    with pytest.raises(ValueError,match="不可行"):
+    with pytest.raises(ValueError,match="infeasible"):
         fleet.start(p["id"])
     assert not fleet.active
 
@@ -233,17 +233,17 @@ def test_agent_uses_actual_drone_tools_and_mission_outlives_chat(tmp_path,fleet)
                 result=json.loads(inputs[-1]['output'])['result']
                 name,args='start_collection_mission',{'plan_id':result['id']}
             else:
-                return {'output':[{'type':'message','content':[{'type':'output_text','text':'模拟任务已提交，尚未完成。'}]}]}
+                return {'output':[{'type':'message','content':[{'type':'output_text','text':'Simulated mission submitted; it has not completed.'}]}]}
             return {'output':[{'type':'function_call','call_id':f'call_{self.turn}','name':name,'arguments':json.dumps(args)}]}
     rt=AgentRuntime(AgentConfig(runtime_dir=tmp_path/'agent'),EngineStub(),gateway=Gateway(),drone_service=fleet)
     session=rt.memory.create_session(rt.engine.context())
-    task=rt.submit(session['id'],'执行G1模拟补采',session['context'])
+    task=rt.submit(session['id'],'Execute simulated collection at G1',session['context'])
     deadline=time.monotonic()+5
     while rt.memory.task(task)['status'] in ('queued','running') and time.monotonic()<deadline:
         time.sleep(.01)
     assert rt.memory.task(task)['status']=='completed'
     assert fleet.active and fleet.mission('latest')['status']=='running'
-    assert rt.memory.history(session['id'])[-1]['content'].startswith('模拟任务已提交')
+    assert rt.memory.history(session['id'])[-1]['content'].startswith('Simulated mission submitted')
     fleet.advance(60)
     assert fleet.mission('latest')['status']=='completed'
     assert any(e['type']=='collected' for e in fleet.mission('latest')['events'])

@@ -33,7 +33,7 @@ class SpatialAgent(Agent):
             names = list(predictor.bank.episodes.names)
             sim = np.asarray(predictor.bundle["prior"], dtype=float)
             if sim.shape != (len(names), len(names)) or not np.isfinite(sim).all():
-                raise ValueError("检查点空间关系矩阵无效")
+                raise ValueError('Invalid checkpoint spatial relationship matrix')
             self._prior = (names, sim)
         return self._prior
 
@@ -42,7 +42,7 @@ class SpatialAgent(Agent):
             names, sim = self._load()
             g = env.payload.get("garage")
             if g is not None and g not in names:
-                return {"error": f"未知停车场: {g}", "garages": names}
+                return {"error": f"Unknown garage: {g}", "garages": names}
             if g is None:
                 return {"garages": names, "similarity": sim.round(4).tolist(),
                         "source": "registered full_history checkpoint prior"}

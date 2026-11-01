@@ -17,7 +17,7 @@ def distance(a, b):
 def astar(start, goal, blocked, start_tick=0, vertices=None, edges=None, horizon=600, goal_hold=0, final_stop=False):
     vertices, edges = vertices or set(), edges or set()
     if goal in blocked or start in blocked:
-        raise ValueError("目标或当前位置被障碍/其他无人机占用")
+        raise ValueError('A target or the current position is occupied by an obstacle or another drone')
     first = (*start, start_tick)
     queue, cost, parent = [(distance(start, goal), start_tick, *start)], {first: 0}, {}
     while queue:
@@ -42,7 +42,7 @@ def astar(start, goal, blocked, start_tick=0, vertices=None, edges=None, horizon
             if nc < cost.get(nxt, math.inf):
                 cost[nxt], parent[nxt] = nc, current
                 heapq.heappush(queue, (nc + distance((nx, ny), goal), nt, nx, ny))
-    raise ValueError("在规划时限内找不到可行路径，请减少目标或调整场景")
+    raise ValueError('No feasible route within the planning horizon. Reduce targets or adjust the scene.')
 
 
 def route_length(path):
@@ -87,7 +87,7 @@ def assign(drones, targets, dwell_seconds, return_home, all_drones=None):
                 continue
             choices.append((length * SLOT + len(order) * dwell_seconds, length - old, drone.id, order))
         if not choices:
-            reasons.append({"target": target, "reason": "没有满足路径与返航电量约束的可用无人机"})
+            reasons.append({"target": target, "reason": 'No drone satisfies route and return-battery constraints'})
         else:
             _, _, identity, order = min(choices)
             orders[identity] = order
@@ -113,7 +113,7 @@ def build_routes(drones, orders, dwell_seconds, return_home, all_drones, mode="c
             for _ in range(count):
                 tick += 1
                 if (*here, tick) in vertices:
-                    raise ValueError("采集/起降位置存在时间冲突")
+                    raise ValueError('A collection or takeoff/landing location has a time conflict')
                 path.append({"x": here[0], "y": here[1], "tick": tick, "phase": phase, "z": z})
 
         def travel(goal, phase, hold_after=0, final_stop=False):

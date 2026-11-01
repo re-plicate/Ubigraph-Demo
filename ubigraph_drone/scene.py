@@ -23,26 +23,26 @@ HOMES = {"1": (1, 2), "2": (1, 7), "3": (1, 13)}
 
 def number(value, name, low, high):
     if type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= high:
-        raise ValueError(f"{name}必须是{low}至{high}之间的有限数值")
+        raise ValueError(f"{name} must be a finite value between {low} and {high}")
     return float(value)
 
 
 def node_id(value):
     if not isinstance(value, str):
-        raise ValueError("目标必须是已登记的网格或停车场编号")
+        raise ValueError('Targets must be registered grid or garage IDs')
     name = value.strip().upper()
     for key, v in NODES.items():
         if name in (key, v["parking_alias"]):
             return key
-    raise ValueError("未知目标；可选 G1—G8 或已登记停车场别名")
+    raise ValueError('Unknown target. Use G1-G8 or a registered garage alias.')
 
 
 def scene_info():
-    return {"id": "synthetic-grid-v1", "name": "补采调度模拟场景", "width": WIDTH,
+    return {"id": "synthetic-grid-v1", "name": 'Collection dispatch simulation scene', "width": WIDTH,
             "height": HEIGHT_CELLS, "unit": "m", "nodes": NODES,
             "obstacles": sorted(OBSTACLES), "homes": HOMES, "slot_seconds": SLOT,
             "minimum_separation_m": SEPARATION, "backend": "simulation",
-            "note": "位置为模拟布置；停车场名称只是业务别名，不表示真实地理位置。电量是仿真假设。"}
+            "note": 'Positions are a simulation layout. Garage names are aliases, not real geographic locations. Battery use is simulated.'}
 
 
 @dataclass

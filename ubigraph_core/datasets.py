@@ -1,6 +1,6 @@
 """Unified parking-time-series loader.
 
-Normalizes CityPulse (Aarhus), SFpark, and London Parking to a common long format:
+Normalizes Aarhus parking, SFpark, and London Parking to a common long format:
 
     garagecode (str), timestamp (naive datetime), available (float),
     capacity (float), observed (bool)
@@ -30,7 +30,7 @@ def _out_long(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_aarhus(raw_dir: Path | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """CityPulse / Aarhus. Already ships in data/raw."""
+    """Aarhus parking data. Already ships in data/raw."""
     raw = Path(raw_dir) if raw_dir else RAW
     df = pd.read_csv(raw / "aarhus_parking.csv")
     meta = pd.read_csv(raw / "aarhus_parking_address.csv")
@@ -46,8 +46,8 @@ def load_sfpark(raw_dir: Path | None = None) -> tuple[pd.DataFrame, pd.DataFrame
     cand = list(raw.glob("*sfpark*")) + list(raw.glob("*sf_park*"))
     if not cand:
         raise FileNotFoundError(
-            "SFpark CSV 未找到。请从 https://data.sfgov.org/Transportation/SFpark-Parking-Occupancy/ 下载，"
-            "存为 data/raw/sfpark.csv")
+            'SFpark CSV was not found. Download it from https://data.sfgov.org/Transportation/SFpark-Parking-Occupancy/ and '
+            'save it as data/raw/sfpark.csv.')
     df = pd.read_csv(cand[0])
     # normalize column names
     df.columns = [c.lower() for c in df.columns]
@@ -68,8 +68,8 @@ def load_london(raw_dir: Path | None = None) -> tuple[pd.DataFrame, pd.DataFrame
     cand = list(raw.glob("*london*park*")) + list(raw.glob("*tfl*park*"))
     if not cand:
         raise FileNotFoundError(
-            "London Parking CSV 未找到。请从 https://data.london.gov.uk/dataset/car-parking 下载，"
-            "存为 data/raw/london_parking.csv")
+            'London Parking CSV was not found. Download it from https://data.london.gov.uk/dataset/car-parking and '
+            'save it as data/raw/london_parking.csv.')
     df = pd.read_csv(cand[0])
     df.columns = [c.lower() for c in df.columns]
     if "date" in df.columns:

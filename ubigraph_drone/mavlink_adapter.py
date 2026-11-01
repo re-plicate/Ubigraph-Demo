@@ -1,17 +1,4 @@
-"""MAVLink adapter shell.
-
-A thin, vendor-neutral interface that the DroneFleetAgent talks to. Two backends:
-
-* ``sim``   — delegates to the existing in-process ``DroneService`` (default, no hardware).
-* ``mavlink`` — if ``pymavlink`` is installed and a connection URL is given
-  (e.g. ``udp:127.0.0.1:14550`` or ``COM5``), arm/takeoff/goto/land are translated
-  into MAVLink messages. This is the "可对接的 MAVLink 接口壳" the user asked for:
-  it compiles against real vehicles/SITL (ArduPilot/PX4) without us needing hardware
-  in this environment.
-
-The shell deliberately does *not* import pymavlink at module import time so that
-the package runs on machines without it.
-"""
+'MAVLink adapter shell.\n\nA thin, vendor-neutral interface that the DroneFleetAgent talks to. Two backends:\n\n* ``sim``   — delegates to the existing in-process ``DroneService`` (default, no hardware).\n* ``mavlink`` — if ``pymavlink`` is installed and a connection URL is given\n  (e.g. ``udp:127.0.0.1:14550`` or ``COM5``), arm/takeoff/goto/land are translated\n  into MAVLink messages. This is the "pluggable MAVLink adapter" the user asked for:\n  it compiles against real vehicles/SITL (ArduPilot/PX4) without us needing hardware\n  in this environment.\n\nThe shell deliberately does *not* import pymavlink at module import time so that\nthe package runs on machines without it.\n'
 from __future__ import annotations
 
 import time
@@ -60,7 +47,7 @@ class MAVLinkAdapter:
             except Exception as exc:
                 self.state.record(f"CONNECT_FAILED {exc!r}")
                 return {"ok": False, "backend": "mavlink", "error": repr(exc),
-                        "hint": "pymavlink 未安装或连接失败；pip install pymavlink 后用 udp:IP:14550 接 SITL"}
+                        "hint": 'pymavlink is unavailable or the connection failed. Install pymavlink and connect to SITL with udp:IP:14550.'}
         # sim / dryrun
         self.state.connected = True
         self.state.mode = "STANDBY"

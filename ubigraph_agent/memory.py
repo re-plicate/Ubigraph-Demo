@@ -25,7 +25,7 @@ class MemoryStore:
               CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT,task_id TEXT,type TEXT,data TEXT,created REAL);
               CREATE INDEX IF NOT EXISTS event_task ON events(task_id,id);
             """)
-            db.execute("UPDATE tasks SET status='interrupted',error='服务重启，任务已中断' WHERE status IN ('queued','running')")
+            db.execute("UPDATE tasks SET status='interrupted',error='The service restarted and interrupted this task' WHERE status IN ('queued','running')")
 
     @contextmanager
     def db(self):
@@ -41,14 +41,14 @@ class MemoryStore:
     def create_session(self, context):
         identity, now = uid(), time.time()
         with self.db() as db:
-            db.execute("INSERT INTO sessions VALUES(?,?,?,?,?)", (identity, "新会话", json.dumps(context), now, now))
+            db.execute("INSERT INTO sessions VALUES(?,?,?,?,?)", (identity, 'New conversation', json.dumps(context), now, now))
         return self.session(identity)
 
     def session(self, identity):
         with self.db() as db:
             row = db.execute("SELECT * FROM sessions WHERE id=?", (identity,)).fetchone()
         if row is None:
-            raise ValueError("会话不存在")
+            raise ValueError('Conversation not found')
         result = dict(row)
         result["context"] = json.loads(result["context"])
         return result
@@ -64,7 +64,7 @@ class MemoryStore:
                        (session_id, role, content, task_id, now))
             db.execute("UPDATE sessions SET updated=? WHERE id=?", (now, session_id))
             if role == "user":
-                db.execute("UPDATE sessions SET title=? WHERE id=? AND title='新会话'", (content[:32], session_id))
+                db.execute("UPDATE sessions SET title=? WHERE id=? AND title='New session'", (content[:32], session_id))
 
     def history(self, session_id):
         with self.db() as db:
@@ -74,7 +74,7 @@ class MemoryStore:
         identity, now = uid(), time.time()
         with self.db() as db:
             if db.execute("SELECT id FROM tasks WHERE session_id=? AND status IN ('queued','running')", (session_id,)).fetchone():
-                raise ValueError("这个会话还有任务执行中，请等待或停止后再发送。")
+                raise ValueError('A task is already running in this conversation. Wait or stop it before sending another request.')
             db.execute("INSERT INTO tasks VALUES(?,?,?,?,?,?,?)", (identity, session_id, "queued", json.dumps(context), "", now, now))
         return identity
 
@@ -82,7 +82,7 @@ class MemoryStore:
         with self.db() as db:
             row = db.execute("SELECT * FROM tasks WHERE id=?", (identity,)).fetchone()
         if row is None:
-            raise ValueError("任务不存在")
+            raise ValueError('Task not found')
         result = dict(row)
         result["context"] = json.loads(result["context"])
         return result

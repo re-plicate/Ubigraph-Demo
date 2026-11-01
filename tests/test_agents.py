@@ -32,7 +32,7 @@ def test_build_system_has_all_agents():
 
 def test_detection_stub_without_weights():
     bus = build_system(run="models/parking")
-    out = bus.dispatch("t", "detection", Envelope("detect", {"image": "x.jpg"}))
+    out = bus.dispatch("t", "detection", Envelope("detect", {"image": "x.jpg", "demo": True}))
     assert out["backend"] == "stub"
     assert isinstance(out["cars_detected"], int)
 

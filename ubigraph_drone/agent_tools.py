@@ -41,31 +41,31 @@ def schemas():
             for name, desc, props in specs]
 
 
-def check(value, rule, path="参数"):
+def check(value, rule, path='argument'):
     kind = rule["type"]
     valid = {"object": lambda: isinstance(value, dict), "array": lambda: isinstance(value, list),
              "string": lambda: isinstance(value, str), "boolean": lambda: type(value) is bool,
              "number": lambda: type(value) in (int, float) and math.isfinite(value)}[kind]()
     if not valid:
-        raise ValueError(path + "类型无效")
+        raise ValueError(path + ' has an invalid type')
     if "enum" in rule and value not in rule["enum"]:
-        raise ValueError(path + "超出登记范围")
+        raise ValueError(path + ' is outside the registered range')
     if kind == "object":
         if set(value) != set(rule["properties"]):
-            raise ValueError(path + "字段不匹配")
+            raise ValueError(path + ' fields do not match')
         for key, child in rule["properties"].items():
             check(value[key], child, path + "." + key)
     elif kind == "array":
         if not rule["minItems"] <= len(value) <= rule["maxItems"]:
-            raise ValueError(path + "数量超出范围")
+            raise ValueError(path + ' count is outside the allowed range')
         for item in value:
             check(item, rule["items"], path + "[]")
         if rule.get("uniqueItems") and len(set(value)) != len(value):
-            raise ValueError(path + "不能重复")
+            raise ValueError(path + ' must be distinct')
     elif kind == "number" and not rule["minimum"] <= value <= rule["maximum"]:
-        raise ValueError(path + "数值超出范围")
+        raise ValueError(path + ' value is out of range')
     elif kind == "string" and not rule.get("minLength", 0) <= len(value) <= rule.get("maxLength", 1000):
-        raise ValueError(path + "长度超出范围")
+        raise ValueError(path + ' length is out of range')
 
 
 def compact(value):

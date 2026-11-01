@@ -34,29 +34,29 @@ class V3Engine:
 
     def normalize_garage(self, name):
         if not isinstance(name, str):
-            raise ValueError("停车场代码必须是字符串")
-        key = name.strip().upper().replace(" ", "").replace("停车场", "")
+            raise ValueError('Garage code must be a string')
+        key = name.strip().upper().replace(" ", "").replace('Garage', "")
         aliases = {"BRUUN": "BRUUNS", "KALK": "KALKVAERKSVEJ", "SCAN": "SCANDCENTER"}
         key = aliases.get(key, key)
         if key not in self.names:
-            raise ValueError("不支持的停车场。可选："+"、".join(self.names))
+            raise ValueError('Unsupported garage. Choose from:'+", ".join(self.names))
         return key
 
     def context(self, value=None):
         value = value or {}
         if not isinstance(value, dict):
-            raise ValueError("任务上下文必须是对象")
+            raise ValueError('Task context must be an object')
         stamp = pd.Timestamp(value.get("as_of") or self.default_as_of)
         if stamp.tzinfo is not None or stamp != stamp.ceil("30min"):
-            raise ValueError("请选择无时区的30分钟网格时刻")
+            raise ValueError('Choose a timezone-free time on a 30-minute grid')
         if stamp < self.minimum or stamp > self.maximum:
-            raise ValueError(f"当前模型回放范围：{self.minimum} 至 {self.maximum}")
+            raise ValueError(f"Current model replay range:{self.minimum} to {self.maximum}")
         protocol, seed = value.get("protocol", "full_history"), value.get("seed", 7)
-        if protocol not in ("fewshot", "full_history") or type(seed) is not int or seed not in self.seed_values:
-            raise ValueError("无效的训练协议或随机种子")
+        if protocol not in self.registry["protocol_configs"] or type(seed) is not int or seed not in self.seed_values:
+            raise ValueError('Invalid training protocol or random seed')
         revision = self.registry["run_hash"]
         if value.get("model_revision", revision) != revision:
-            raise ValueError("预测模型已更新，请开始新会话，避免混用旧模型结果。")
+            raise ValueError('Forecast model updated. Start a new conversation to keep model evidence consistent.')
         return {"as_of": str(stamp), "protocol": protocol, "seed": seed, "model_revision": revision}
 
     def protocol_config(self, context):
@@ -73,13 +73,13 @@ class V3Engine:
 
     def capabilities(self):
         return {"version": "V3", "garages": self.names,
-                **self.input_spec(), "horizon_minutes": [30], "protocols": ["full_history", "fewshot"],
-                "protocol_inputs": {p: self.input_spec({"protocol": p}) for p in ("full_history", "fewshot")},
-                "default_protocol": "full_history", "experimental_protocols": ["fewshot"],
+                **self.input_spec(), "horizon_minutes": [30], "protocols": list(self.registry["protocol_configs"]),
+                "protocol_inputs": {p: self.input_spec({"protocol": p}) for p in self.registry["protocol_configs"]},
+                "default_protocol": "full_history", "experimental_protocols": [],
                 "seeds": self.seed_values, "default_as_of": self.default_as_of,
                 "as_of_min": str(self.minimum), "as_of_max": str(self.maximum),
                 "acquisition_enabled": False, "training_enabled": False,
-                "interval_available": False, "data_mode": "CityPulse历史回放，不是实时城市数据",
+                "interval_available": False, "data_mode": 'Aarhus historical replay, not live city data',
                 "run_hash": self.registry["run_hash"]}
 
     def forecaster(self, target, context):
@@ -90,7 +90,7 @@ class V3Engine:
                 predictor = STForecaster.load(self.run/path)
                 cfg = self.protocol_config(context)
                 if any(getattr(predictor.cfg, k) != getattr(cfg, k) for k in ("window", "neighbors", "hidden", "freq_minutes", "horizon")):
-                    raise ValueError("登记的输入规格与预测检查点不一致，请使用匹配的模型配置。")
+                    raise ValueError('Registered input specification does not match forecast checkpoint. Use a matching configuration.')
                 self.cache[key] = predictor
             return self.cache[key]
 
@@ -121,11 +121,11 @@ class V3Engine:
                        "observed": bool(r.observed), "age": float(r.age) if np.isfinite(r.age) else None}
                       for r in table.itertuples()]
             output.append({"garage": name, "capacity": float(table.capacity.iloc[0]), "valid": error is None,
-                           "quality_note": error or "历史符合V3输入要求", "observed_points": int(table.observed.sum()),
+                           "quality_note": error or 'History meets V3 input requirements.', "observed_points": int(table.observed.sum()),
                            "history_points": len(table), "history": points,
                            "current_available": points[-1]["available"], "latest_observed": points[-1]["observed"]})
         return {"kind": "history", "as_of": context["as_of"], "items": output, "input_spec": self.input_spec(context),
-                "note": "按数据截止时刻构造历史输入，时间间隔为30分钟。"}
+                "note": 'Historical input is constructed at the selected cutoff on a 30-minute grid.'}
 
     def spatial(self, target, context, top_k=5):
         target = self.normalize_garage(target)
@@ -139,16 +139,16 @@ class V3Engine:
                 "garages": e.names, "matrix": f.bundle["prior"].tolist(),
                 "coordinates": [{"garage": n, "latitude": float(self.prepared.metadata.loc[n, "latitude"]),
                                  "longitude": float(self.prepared.metadata.loc[n, "longitude"])} for n in e.names],
-                "note": "读取V3检查点中实际使用的CoSimHeat地理图先验；相似度不是预测置信度，也不是本次注意力。"}
+                "note": 'The checkpoint’s CoSimHeat geographic prior. Similarity is not prediction confidence or current attention.'}
 
     def predict(self, targets, context, horizon=30, include_other=True):
         if type(horizon) is not int or horizon != 30:
-            raise ValueError("当前V3只支持30分钟单步预测；未执行其他跨度的预测。")
+            raise ValueError('V3 supports only a single 30-minute forecast step. Other horizons were not evaluated.')
         if type(include_other) is not bool:
-            raise ValueError("include_other_parking必须是布尔值")
+            raise ValueError('include_other_parking must be a boolean')
         targets = list(dict.fromkeys(self.normalize_garage(n) for n in targets))
         if not targets or len(targets) > 6:
-            raise ValueError("一次请选择1至6个停车场")
+            raise ValueError('Select between 1 and 6 garages per request')
         results = []
         with self.lock:
             for target in targets:
@@ -160,20 +160,20 @@ class V3Engine:
                 statuses = {}
                 for j, name in enumerate(names):
                     if not include_other and name != target:
-                        statuses[name] = "本次按要求屏蔽"
+                        statuses[name] = 'Input masked as requested'
                         continue
                     try:
                         feature, when, cap = history_to_feature(self.history(name, context), cfg)
                     except ValueError as exc:
-                        statuses[name] = "数据不满足要求，已屏蔽"
+                        statuses[name] = 'Data requirements not met; input masked'
                         if name == target:
-                            raise ValueError(f"{target} 当前历史不满足V3要求：{exc}。模拟采集不会补齐停车观测，请选择其他时刻。") from None
+                            raise ValueError(f"{target} does not have history meeting the V3 input requirements: {exc}. Simulated collection does not fill parking observations. Select another cutoff.") from None
                         continue
                     if cap != float(f.bank.episodes.capacities[j]):
-                        raise ValueError(f"{name} 数据容量与V3检查点不一致，请使用匹配的数据和模型。")
+                        raise ValueError(f"{name} has a capacity that differs from the V3 checkpoint. Use matching data and models.")
                     x[0, j] = torch.tensor(feature[0])
                     available[0, j] = True
-                    statuses[name] = "可用"
+                    statuses[name] = 'Available'
                 anchor = pd.Timestamp(context["as_of"])
                 when = anchor+pd.Timedelta(30, unit="min")
                 query = Episodes(x, torch.zeros(1, len(names)), available, torch.zeros_like(available),
@@ -204,26 +204,11 @@ class V3Engine:
         return {"kind": "forecast", "items": results, **context, "model": "V3 / GroC / CoSimHeat / spatial attention",
                 "input_spec": self.input_spec(context),
                 "include_other_parking": include_other, "run_hash": self.registry["run_hash"],
-                "note": "点预测；注意力不是置信度。仅本场输入指同一个attention检查点屏蔽外部输入，不是另训local模型。"}
+                "note": 'Point forecast; attention is not confidence. Own-only input masks external data in the same attention checkpoint, rather than a separately trained local model.'}
 
-    def benchmarks(self):
-        data = pd.read_csv(self.run/self.registry.get("metrics_dir", ".")/"metrics_across_seeds.csv")
-        data = data[~data["mode"].str.contains("others_missing")]
-        data = data.where(pd.notna(data), None)
-        # Convert NaN explicitly rather than serializing invalid JSON.
-        rows = json.loads(data.to_json(orient="records"))
-        for row in rows:
-            joint = row["method"] == "groc" and row["mode"] == "attention"
-            row["is_primary"] = (row["model_role"] == "primary" if "model_role" in row
-                                 else joint and row["protocol"] == "full_history")
-            row["is_additional_experiment"] = joint and row["protocol"] == "fewshot"
-        primary = [r for r in rows if r["is_primary"]]
-        evaluation = self.registry.get("evaluation", {
-            p: {"labels_per_seed": 9820, "history_points": self.input_spec({"protocol": p})["history_points"]}
-            for p in ("full_history", "fewshot")})
-        return {"kind": "benchmarks", "items": rows, "primary_results": primary,
-                "additional_experiments": [r for r in rows if r["is_additional_experiment"]],
-                "primary_definition": f"以is_primary=true的行作为主方案；当前加载完整历史、{self.input_spec()['history_hours']:g}小时窗口、{self.cfg.neighbors}个时间邻居、GroC+attention。fewshot仅为附加试验；method=full是未凝缩训练数据对照。",
-                "seeds": self.seed_values, "test_labels_per_seed": evaluation["full_history"]["labels_per_seed"],
-                "evaluation": evaluation,
-                "note": "同一协议内使用相同测试标签作对照；完整历史与少样本的评估范围分别列出。MAE与RMSE单位为车位。"}
+    def model_info(self):
+        return {"kind": "model_info", "name": "UbiGraph", "model": "V3",
+                "input_spec": self.input_spec(), "garages": self.names,
+                "seeds": self.seed_values, "data_mode": "Historical replay",
+                "training_enabled": False, "acquisition_enabled": False,
+                "note": "Forecasts run locally with the included pretrained model. Fleet missions use motion simulation and return action receipts."}

@@ -25,7 +25,7 @@ def test_hover_drain_rechecks_obstacle_aware_return_before_dispatch(fleet):
     assert plan['feasible']
     fleet.advance((fleet.drones['1'].battery-27.7)/.035)
     assert fleet.drones['1'].battery==pytest.approx(27.7,abs=.002)
-    with pytest.raises(ValueError,match='返航电量'):
+    with pytest.raises(ValueError,match='return battery'):
         fleet.start(plan['id'])
     assert fleet.active is None
 
@@ -35,7 +35,7 @@ def test_unassigned_hovering_drone_has_wait_and_return_budget(fleet):
     fleet.configure_drone('2',battery=17)
     plan=fleet.plan('other-hover',['G3'],['1'])
     assert not plan['feasible']
-    assert any('2号' in r['reason'] for r in plan['rejected'])
+    assert any('Drone 2' in r['reason'] for r in plan['rejected'])
 
 
 def test_restart_invalidates_unstarted_hover_plan_and_freezes_interrupted_time(tmp_path):
@@ -46,7 +46,7 @@ def test_restart_invalidates_unstarted_hover_plan_and_freezes_interrupted_time(t
     fleet.close()
     recovered=DroneService(tmp_path,autostart=False)
     try:
-        with pytest.raises(ValueError,match='过期'):
+        with pytest.raises(ValueError,match='stale'):
             recovered.start(old['id'])
         record=recovered.mission(m['id'])
         assert record['status']=='interrupted' and record['actual_duration_seconds']==pytest.approx(7)
@@ -88,7 +88,7 @@ def test_fault_during_cancel_return_stops_the_drone_and_keeps_original_jobs(flee
 
 def test_only_one_service_can_own_a_runtime_directory(fleet):
     before=fleet.snapshot()
-    with pytest.raises(ValueError,match='另一实例'):
+    with pytest.raises(ValueError,match='runtime directory is in use'):
         DroneService(fleet.directory,autostart=False)
     assert fleet.snapshot()['revision']==before['revision']
     assert fleet.snapshot()['fleet']==before['fleet']
@@ -111,14 +111,14 @@ def test_concurrent_submission_starts_exactly_one_mission(fleet):
 def test_second_agent_runtime_cannot_interrupt_first_runtime_chat(tmp_path):
     class Engine:
         names=['BRUUNS']
-        def context(self,value=None): return value or {'as_of':'2014-09-30 23:30:00','protocol':'fewshot','seed':7}
+        def context(self,value=None): return value or {'as_of':'2014-09-30 23:30:00','protocol':'full_history','seed':7}
     cfg=AgentConfig(runtime_dir=tmp_path)
     runtime=AgentRuntime(cfg,Engine())
     try:
         session=runtime.memory.create_session(runtime.engine.context())
         job=runtime.memory.create_task(session['id'],session['context'])
         runtime.memory.task_status(job,'running')
-        with pytest.raises(ValueError,match='另一实例'):
+        with pytest.raises(ValueError,match='runtime directory is in use'):
             AgentRuntime(cfg,Engine())
         assert runtime.memory.task(job)['status']=='running'
     finally:
@@ -155,7 +155,7 @@ def test_background_failure_is_visible_and_worker_survives(tmp_path,monkeypatch)
         with d.lock:
             assert d.last_error and d.paused and d.thread.is_alive()
             assert d.mission(m['id'])['status']=='failed'
-        with pytest.raises(ValueError,match='重置'):
+        with pytest.raises(ValueError,match='Reset'):
             d.plan('must-reset',['G2'])
         monkeypatch.setattr(d,'_step',original)
         d.reset()

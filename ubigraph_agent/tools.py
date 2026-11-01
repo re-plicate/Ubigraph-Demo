@@ -10,7 +10,7 @@ TOOL_LABELS = {
     "get_spatial_similarity": ("Spatial Agent", "Read CoSimHeat relationships"),
     "explain_prediction": ("Analysis Agent", "Explain forecast evidence"),
     "get_method_overview": ("Knowledge tools", "Explain the algorithm"),
-    "get_experiment_results": ("Evaluation tools", "Read offline evaluation"),
+    "get_model_information": ("Model tools", "Inspect the deployed model"),
 }
 TOOL_LABELS.update(DRONE_LABELS)
 TOOL_LABELS.update({
@@ -21,7 +21,7 @@ TOOL_LABELS.update({
 })
 
 
-OVERVIEWS = {'workflow': 'The primary model uses full-history joint forecasting; few-shot is an additional experiment. The selected protocol uses {history_points} half-hour observations ({history_hours:g} hours) to forecast the next step. {history_feature_dim} history features plus change and role markers form {node_input_dim}-dimensional node inputs, encoded into {hidden_dim}-dimensional temporal states. CoSimHeat informs cross-garage attention. Own-history residual, retrieved historical change and a joint forecast correction produce an availability rate, then capacity converts it to spaces.', 'time_gnn': 'Each node represents an entire {history_points}-point history window. Its {node_input_dim} inputs contain {history_feature_dim} history features, one change value and one role marker. The current node uses zero change and role 0; at most {temporal_neighbors} past neighbors use their known historical changes and role 1. Linear({node_input_dim},{hidden_dim}) and SiLU encode nodes. Temporal edge weights aggregate history before h=SiLU(W_self*own+b_self+W_msg*context). Retrieval uses only history and calendar data, never the current or future answer. Hidden dimensions are not probabilities.', 'spatial_attention': 'Each garage has a 32-dimensional temporal state h. q_i=Linear([h_i,8 calendar features]), k_j=Linear(h_j), v_j=Linear(h_j). Score=q_i*k_j/sqrt(32)+0.5*log(max(CoSimHeat_ij,1e-6)). Softmax covers available garages including self. Weighted values form context; z_i=LayerNorm(h_i+W_O*context_i). CoSimHeat is a geographic prior and attention is a computed aggregation weight. Neither is calibrated confidence.', 'condensation': 'Full-history GroC condenses permitted synchronized histories of all six garages into {synthetic_episodes} synthetic episodes. The first {temporal_neighbors} episodes provide context and the remainder supervise the final predictor. Each contains {history_points} half-hour observations. Condensation matches gradients of joint spatiotemporal loss using local perturbations, alternating history-rate and edge-score optimization, and multiple parameter initializations. Labels, calendar and quality flags stay fixed; rates remain in [0,1] with a 0.05 trust region. The final predictor is reinitialized after condensation. Only the additional few-shot experiment excludes the target and gives it 96 real label windows; this budget differs from source synthetic episodes.', 'scope': 'Historical parking-data replay supports six garages and 30-minute single-step forecasts. Full history is primary; few-shot with 96 target label windows is additional research. The three-drone motion simulator accepts supplied targets, plans routes and records action receipts.', 'drone': 'Up to three simulated drones operate on the metre-based G1-G8 scene. Targets and priorities come from the user or observation review. Estimated completion time guides assignment. Space-time A* reserves vertices and reverse edges; velocity feed-forward and position-error feedback track routes. Background execution records arrival, collection, return and landing events. Receipt measurement=null: no measured parking observations and no claimed prediction improvement.', 'agent': 'One Responses LLM orchestrates typed tools for data inspection, V3 forecasting, spatial analysis, explanation, review and fleet dispatch. Numerical forecasts come from the local trained GNN. SQLite persists conversations, tool events and simulation state. The browser streams progress and displays evidence. Vision needs valid local weights; transfer remains experimental.'}
+OVERVIEWS = {'workflow': 'The demo uses the included pretrained joint forecaster. The selected protocol uses {history_points} half-hour observations ({history_hours:g} hours) to forecast the next step. {history_feature_dim} history features plus change and role markers form {node_input_dim}-dimensional node inputs, encoded into {hidden_dim}-dimensional temporal states. CoSimHeat informs cross-garage attention. Own-history residual, retrieved historical change and a joint forecast correction produce an availability rate, then capacity converts it to spaces.', 'time_gnn': 'Each node represents an entire {history_points}-point history window. Its {node_input_dim} inputs contain {history_feature_dim} history features, one change value and one role marker. The current node uses zero change and role 0; at most {temporal_neighbors} past neighbors use their known historical changes and role 1. Linear({node_input_dim},{hidden_dim}) and SiLU encode nodes. Temporal edge weights aggregate history before h=SiLU(W_self*own+b_self+W_msg*context). Retrieval uses only history and calendar data, never the current or future answer. Hidden dimensions are not probabilities.', 'spatial_attention': 'Each garage has a 32-dimensional temporal state h. q_i=Linear([h_i,8 calendar features]), k_j=Linear(h_j), v_j=Linear(h_j). Score=q_i*k_j/sqrt(32)+0.5*log(max(CoSimHeat_ij,1e-6)). Softmax covers available garages including self. Weighted values form context; z_i=LayerNorm(h_i+W_O*context_i). CoSimHeat is a geographic prior and attention is a computed aggregation weight. Neither is calibrated confidence.', 'condensation': 'Full-history GroC condenses permitted synchronized histories of all six garages into {synthetic_episodes} synthetic episodes. The first {temporal_neighbors} episodes provide context and the remainder supervise the final predictor. Each contains {history_points} half-hour observations. Condensation matches gradients of joint spatiotemporal loss using local perturbations, alternating history-rate and edge-score optimization, and multiple parameter initializations. Labels, calendar and quality flags stay fixed; rates remain in [0,1] with a 0.05 trust region. The final predictor is reinitialized after condensation. The demo serves frozen checkpoints; it does not train a model during a conversation.', 'scope': 'Historical parking-data replay supports six garages and 30-minute single-step forecasts. The demo uses the included full-history checkpoints. The three-drone motion simulator accepts supplied targets, plans routes and records action receipts.', 'drone': 'Up to three simulated drones operate on the metre-based G1-G8 scene. Targets and priorities come from the user or observation review. Estimated completion time guides assignment. Space-time A* reserves vertices and reverse edges; velocity feed-forward and position-error feedback track routes. Background execution records arrival, collection, return and landing events. Receipt measurement=null: no measured parking observations and no claimed prediction improvement.', 'agent': 'One configured LLM orchestrates typed tools for data inspection, V3 forecasting, spatial analysis, explanation, review and fleet dispatch. Numerical forecasts come from the local trained GNN. SQLite persists conversations, tool events and simulation state. The browser streams progress and displays evidence. Vision needs valid local weights; transfer remains experimental.'}
 
 
 DEFAULT_INPUT_SPEC = {"history_points": 24, "history_hours": 12, "history_feature_dim": 80,
@@ -47,7 +47,7 @@ def schemas(names, history_points=24):
             "target": {"type": "string", "enum": names}}),
         ("get_method_overview", "Read verified V3 methodology and implementation capabilities. Respect the current input specification.", {
             "topic": {"type": "string", "enum": list(OVERVIEWS)}}),
-        ("get_experiment_results", "Read measured three-seed offline evaluations. Follow primary_results and is_primary. Full history, 12 hours, 8 neighbors, GroC and attention are primary. Six-hour configuration is a comparison; few-shot is additional. method=full is an uncondensed baseline. Metrics are not confidence.", {}),
+        ("get_model_information", "Read the deployed model input specification and supported garages. No experiment results are included in this demo.", {}),
     ]
     specs += [
         ("get_agent_directory", "Inspect actual agent capabilities and readiness. Do not claim detection if weights are unconfigured.", {}),
@@ -62,27 +62,27 @@ def schemas(names, history_points=24):
 
 def validate(arguments, spec):
     if not isinstance(arguments, dict):
-        raise ValueError("工具参数必须是JSON对象")
+        raise ValueError('Tool arguments must be a JSON object')
     props = spec["parameters"]["properties"]
     if set(arguments) != set(props):
-        raise ValueError("工具参数字段不匹配："+"、".join(props))
+        raise ValueError('Tool argument fields do not match: '+", ".join(props))
     for name, rule in props.items():
         v, kind = arguments[name], rule["type"]
         if kind == "string" and not isinstance(v, str):
-            raise ValueError(f"{name}必须是字符串")
+            raise ValueError(f"{name} must be a string")
         if kind == "boolean" and type(v) is not bool:
-            raise ValueError(f"{name}必须是布尔值")
+            raise ValueError(f"{name} must be a boolean")
         if kind == "integer" and type(v) is not int:
-            raise ValueError(f"{name}必须是整数")
+            raise ValueError(f"{name} must be an integer")
         if "enum" in rule and v not in rule["enum"]:
-            raise ValueError(f"{name}超出当前支持范围：{rule['enum']}")
+            raise ValueError(f"{name} is outside the supported range: {rule['enum']}")
         if kind == "integer" and not rule.get("minimum", v) <= v <= rule.get("maximum", v):
-            raise ValueError(f"{name}超出允许范围")
+            raise ValueError(f"{name} is outside the allowed range")
         if kind == "array":
             if not isinstance(v, list) or not rule["minItems"] <= len(v) <= rule["maxItems"]:
-                raise ValueError(f"{name}需要1至6个停车场")
+                raise ValueError(f"{name}: select between 1 and 6 garages")
             if any(not isinstance(x, str) or x not in rule["items"]["enum"] for x in v):
-                raise ValueError("停车场代码不受当前V3支持")
+                raise ValueError('This garage code is not supported by the current V3 model')
 
 
 class Skills:
@@ -120,14 +120,14 @@ class Skills:
             if not self.hub: raise ValueError("Agent registry is not connected")
             return self.hub.directory()
         if name == "assess_collection_need":
-            if not self.hub: raise ValueError("Decision reviewAgentDisconnected")
+            if not self.hub: raise ValueError("Decision review agent is not connected")
             return self.hub.assess(arguments["targets"], self.context)
         if name == "get_detection_status":
-            if not self.hub: raise ValueError("VisionAgentDisconnected")
+            if not self.hub: raise ValueError("Vision agent is not connected")
             status = self.hub.call("detection", "status", {})
             return {"kind": "detection_status", **status}
         if name == "transfer_parking_estimate":
-            if not self.hub: raise ValueError("TransferAgentDisconnected")
+            if not self.hub: raise ValueError("Transfer agent is not connected")
             return self.hub.transfer(arguments["sources"], arguments["target"], self.context)
         if name == "inspect_history":
             return (self.hub.call("data", "inspect", {"targets": arguments["targets"], "context": self.context})
@@ -155,7 +155,7 @@ class Skills:
         if name == "get_method_overview":
             return {"kind": "method", "topic": arguments["topic"], "text": overview(arguments["topic"], self.input_spec),
                     "version": "V3", "input_spec": self.input_spec}
-        return self.engine.benchmarks()
+        return self.engine.model_info()
 
 
 def instructions(context, names, prior_artifacts, drones_enabled=False, input_spec=None):
@@ -173,8 +173,8 @@ def instructions(context, names, prior_artifacts, drones_enabled=False, input_sp
     return f"""You are UbiGraph, an English-language parking analytics and simulated drone operations assistant. The product name is always UbiGraph. In user-facing responses, refer to the source as the historical parking dataset without using its legacy branding. Write clear, concise English in every response, including when the user writes another language. Route requests through the registered specialist tools; these are deterministic tools sharing one engine and fleet, not independent LLM conversations.
 Fixed context: {json.dumps(context)}. Supported garages: {', '.join(names)}. Input specification: {json.dumps(spec)}.
 The only numerical forecasting algorithm is the registered frozen V3 checkpoint. ALWAYS call predict_parking before quoting forecasts or comparing garages. Never substitute current availability for a forecast. Only a 30-minute single-step horizon is supported. Historical replay refers to 2014, not current parking conditions. Do not silently change cutoff, protocol or model revision. Invalid history cannot be replaced with invented values; simulation collection does not repair observations.
-Default primary configuration: full_history, GroC, attention, 12-hour history and 8 neighbors. Respect the actual checkpoint specification and primary_results/is_primary flags. The 6-hour model is a window comparison; few-shot is an additional experiment with a separate evaluation scope. Do not confuse protocol with method. Compare offline metrics only on matching test labels. Three seeds are not three times as many independent samples.
-For history inspection use inspect_history; spatial relationships use get_spatial_similarity; prediction evidence use explain_prediction; algorithm details use get_method_overview; measured offline performance use get_experiment_results. Use actual tool values, with forecast time, input scenario and approximately two decimal places. Similarity and attention are NOT calibrated confidence. Do not invent causes such as weather or events; clearly mark any inference. Forecasts and receipts must be traceable to tools.
+Default configuration: full_history, GroC, attention, 12-hour history and 8 neighbors. Respect the actual checkpoint input specification. This demo contains no experimental comparison data.
+For history inspection use inspect_history; spatial relationships use get_spatial_similarity; prediction evidence use explain_prediction; algorithm details use get_method_overview; deployed model settings use get_model_information. Use actual tool values, with forecast time, input scenario and approximately two decimal places. Similarity and attention are NOT calibrated confidence. Do not invent causes such as weather or events; clearly mark any inference. Forecasts and receipts must be traceable to tools.
 For autonomous inspection or collection-need requests, call assess_collection_need FIRST. Only its observation-quality evidence can justify recommended_targets. Low parking availability or subjective confidence does not justify dispatch. If no gap exists, explain that no dispatch is needed. For externally specified G1-G8 targets or registered garage aliases, call get_fleet_status then plan_collection_mission. Default up to three drones [1,2,3], requested collection 3 seconds, return_home true, no invented priorities. The optimizer may use fewer drones. Use a unique request_id for new content; reuse it only for the same request. Targets and drone IDs are different. Collection time rounds up to simulator time slots; distinguish requested and actual duration.
 All flight tools are SIMULATION ONLY. Plan-only requests must stop after planning. Execute only when the user requests it and server policy permits; explicit authorized simulation requests need no repeated confirmation. start_collection_mission requires a real feasible plan. Review-first policy rejects takeoff/navigation/start while preserving plans. Never claim accepted or estimated means completed. Query get_mission_status for actual events; report mission ID and live tracking after submission rather than polling the whole flight. Receipts contain action evidence only, measurement=null, with NO measured parking observations and NO automatic forecast/training update. No physical hardware or MAVLink control is connected.
 Single-drone control uses control_drone. Check actual state before further actions; airborne prerequisites must be respected. Cancel via cancel_mission; cancellation and return are not immediate landing. Explain infeasible plans without inventing success or retrying indefinitely.

@@ -1,19 +1,4 @@
-"""FastAPI surface for the CityClaw multi-agent system.
-
-Run with::
-
-    uvicorn ubigraph_agents.api:app --port 8766
-
-Endpoints mirror the project doc's serving layer:
-  GET  /api/agents                 list registered agents
-  POST /api/agents/{name}/call     call one agent directly
-  POST /api/orchestrator/analyze   run the analysis->gate loop
-  POST /api/orchestrator/mission   run analyze->drone补采 loop
-  GET  /api/evidence               the decision evidence chain
-  POST /api/hic/feedback           record human feedback
-  GET  /api/drone/mavlink          MAVLink adapter snapshot
-  POST /api/drone/mavlink/command  issue arm/takeoff/goto/land
-"""
+"FastAPI surface for the UbiGraph multi-agent system.\n\nRun with::\n\n    uvicorn ubigraph_agents.api:app --port 8766\n\nEndpoints mirror the project doc's serving layer:\n  GET  /api/agents                 list registered agents\n  POST /api/agents/{name}/call     call one agent directly\n  POST /api/orchestrator/analyze   run the analysis->gate loop\n  POST /api/orchestrator/mission   run analyze->simulated collection loop\n  GET  /api/evidence               the decision evidence chain\n  POST /api/hic/feedback           record human feedback\n  GET  /api/drone/mavlink          MAVLink adapter snapshot\n  POST /api/drone/mavlink/command  issue arm/takeoff/goto/land\n"
 from __future__ import annotations
 
 import os
@@ -28,7 +13,7 @@ from pydantic import BaseModel
 from .base import Envelope
 from .system import build_system
 
-app = FastAPI(title="CityClaw Multi-Agent API", version="1.0.0")
+app = FastAPI(title="UbiGraph Multi-Agent API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

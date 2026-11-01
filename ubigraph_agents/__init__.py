@@ -1,4 +1,4 @@
-"""CityClaw multi-agent orchestration layer.
+"""UbiGraph multi-agent orchestration layer.
 
 This package wraps the existing UbiGraph capabilities (spatiotemporal prediction,
 CoSimHeat spatial similarity, simulated fleet) as first-class agents and adds the
