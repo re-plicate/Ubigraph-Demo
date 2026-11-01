@@ -2,9 +2,13 @@
 
 A local workspace for conversational urban analysis and reviewed sensing missions. Ask a question, inspect a model forecast, review structured flight commands, and follow a three-drone simulation.
 
-[![UbiGraph workspace — watch the demo](docs/media/overview.jpg)](docs/media/ubigraph-demo.mp4)
+[![UbiGraph workspace — watch the full walkthrough](docs/media/overview.jpg)](docs/media/ubigraph-full-walkthrough.mp4)
 
-**[Watch the 38-second demo video](docs/media/ubigraph-demo.mp4)** · [Forecast and agent collaboration](docs/media/forecast.jpg) · [Mission planning and execution](docs/media/fleet.jpg)
+**[Watch the full walkthrough (2:05, English narration)](docs/media/ubigraph-full-walkthrough.mp4)** · [Quick preview (0:38)](docs/media/ubigraph-demo.mp4) · [English subtitles](docs/media/ubigraph-full-walkthrough.srt)
+
+The full walkthrough covers the workspace, specialist collaboration, forecasting, observation review, structured commands, simulated flight and execution receipts. It was recorded on an earlier build and includes its former evaluation page; the setup below describes the current demo.
+
+[Forecast and agent collaboration](docs/media/forecast.jpg) · [Mission planning and execution](docs/media/fleet.jpg)
 
 The demo includes historical data and pretrained models. No training, frontend build, Node.js installation or drone hardware is needed. Chat uses your LLM provider; numerical predictions run locally.
 

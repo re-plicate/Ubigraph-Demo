@@ -1,0 +1,107 @@
+1
+00:00:00,000 --> 00:00:06,790
+UbiGraph connects conversational analysis, specialist
+tools, and a three drone simulation.
+
+2
+00:00:06,790 --> 00:00:12,790
+The workspace brings observation coverage, fleet readiness, and
+recent collaboration together.
+
+3
+00:00:12,790 --> 00:00:16,675
+One DeepSeek orchestrator routes requests to specialist modules.
+Vision is unconfigured, and transfer is
+
+4
+00:00:16,675 --> 00:00:20,560
+experimental.
+
+5
+00:00:20,560 --> 00:00:25,815
+A natural language request triggers the actual V3 model and
+spatial analysis. BRUUNS is forecast at about nine
+
+6
+00:00:25,815 --> 00:00:31,070
+hundred and three available spaces, with traceable evidence.
+
+7
+00:00:31,070 --> 00:00:34,930
+Explore geographic relationships between six garages. Similarity
+is a spatial prior, not prediction
+
+8
+00:00:34,930 --> 00:00:38,790
+confidence.
+
+9
+00:00:38,790 --> 00:00:44,790
+At a different historical cutoff, the review tool detects missing
+observations across all six garages. It
+
+10
+00:00:44,790 --> 00:00:50,790
+recommends collection from actual data quality evidence, without
+launching a mission.
+
+11
+00:00:50,790 --> 00:00:56,290
+The next request supplies three collection targets. The planner
+checks fleet availability and produces a
+
+12
+00:00:56,290 --> 00:01:01,790
+feasible plan. Review first means nothing takes off yet.
+
+13
+00:01:01,790 --> 00:01:08,950
+The command workspace exposes takeoff, navigation, collection,
+return, and landing as structured actions.
+
+14
+00:01:08,950 --> 00:01:16,950
+Now the mission executes in the simulator. Watch the actual
+routes and drone states. The optimizer uses two of
+
+15
+00:01:16,950 --> 00:01:24,950
+three available drones, collecting at all three targets before
+returning and landing. This capture shows the
+
+16
+00:01:24,950 --> 00:01:32,950
+simulator running at four times speed.
+
+17
+00:01:32,950 --> 00:01:36,915
+All three targets complete, with action receipts, an eighty four
+second simulation time, and about sixty four
+
+18
+00:01:36,915 --> 00:01:40,880
+meters traveled.
+
+19
+00:01:40,880 --> 00:01:44,705
+Offline evaluation compares configurations on shared test labels,
+with separate full history and few shot
+
+20
+00:01:44,705 --> 00:01:48,530
+experiment scopes.
+
+21
+00:01:48,530 --> 00:01:54,250
+The architecture separates one language model, deterministic
+specialist tools, a frozen numerical predictor,
+
+22
+00:01:54,250 --> 00:01:59,970
+and a background simulator. Action receipts do not create
+measured parking data.
+
+23
+00:01:59,970 --> 00:02:05,110
+UbiGraph. From a question to evidence, and a simulated
+flight.
