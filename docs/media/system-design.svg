@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="500" viewBox="0 0 1120 500" role="img" aria-labelledby="title desc"><title id="title">UbiGraph system design</title><desc id="desc">A user workspace communicates with one LLM orchestrator, which calls specialist services through a shared agent bus. Local models and the fleet simulator compute outputs. SQLite preserves conversations, tool events, plans and mission receipts.</desc><rect width="1120" height="500" rx="18" fill="#f8faf6"/>
+<text x="38" y="52.3" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700" fill="#173b2d">Conversation, tools and evidence</text>
+<text x="38" y="85.82" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="400" fill="#617368">One LLM coordinates the workflow. Local services produce the results.</text>
+<rect x="38" y="120" width="244" height="218" rx="12" fill="#ffffff" stroke="#d7e2d6"/>
+<rect x="330" y="120" width="300" height="218" rx="12" fill="#173b2d"/>
+<rect x="678" y="120" width="404" height="218" rx="12" fill="#ffffff" stroke="#d7e2d6"/>
+<text x="58" y="154.58" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" fill="#617368">USER WORKSPACE</text>
+<text x="58" y="199.87" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#173b2d">Ask and inspect</text>
+<text x="58" y="240.2" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="400" fill="#173b2d">Streaming conversation</text>
+<text x="58" y="274.2" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="400" fill="#173b2d">Plan review</text>
+<text x="58" y="308.2" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="400" fill="#173b2d">Mission tracking</text>
+<text x="350" y="154.58" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" fill="#c9e2bd">ORCHESTRATION</text>
+<text x="350" y="199.87" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#ffffff">LLM orchestrator</text>
+<text x="350" y="240.2" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="400" fill="#e5efdf">Typed tools and policy checks</text>
+<text x="350" y="274.2" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="400" fill="#e5efdf">Bounded tool-call loop</text>
+<text x="350" y="308.2" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="400" fill="#e5efdf">Shared Agent Bus</text>
+<text x="698" y="154.58" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" fill="#617368">SPECIALIST SERVICES</text>
+<text x="698" y="199.87" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#173b2d">Local computation</text>
+<text x="698" y="240.2" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="400" fill="#173b2d">Data inspection and spatial context</text>
+<text x="698" y="274.2" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="400" fill="#173b2d">Frozen spatiotemporal forecasting</text>
+<text x="698" y="308.2" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="400" fill="#173b2d">Collection review and fleet simulation</text>
+<polyline points="285,215 326,215" fill="none" stroke="#27796b" stroke-width="2"/>
+<polygon points="326,215 317,210 317,220" fill="#27796b"/>
+<polyline points="326,270 285,270" fill="none" stroke="#27796b" stroke-width="2"/>
+<polygon points="285,270 294,265 294,275" fill="#27796b"/>
+<polyline points="633,215 674,215" fill="none" stroke="#27796b" stroke-width="2"/>
+<polygon points="674,215 665,210 665,220" fill="#27796b"/>
+<polyline points="674,270 633,270" fill="none" stroke="#27796b" stroke-width="2"/>
+<polygon points="633,270 642,265 642,275" fill="#27796b"/>
+<text x="58" y="384.82" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="400" fill="#27796b">Tool results feed the next LLM step; events stream to the workspace.</text>
+<rect x="38" y="414" width="1044" height="58" rx="10" fill="#e7efdf"/>
+<text x="58" y="448.82" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="700" fill="#173b2d">SQLite evidence</text>
+<text x="273" y="448.82" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="400" fill="#173b2d">Conversations, tool events, plans and mission receipts</text>
+</svg>

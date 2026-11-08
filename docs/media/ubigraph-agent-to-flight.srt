@@ -1,0 +1,49 @@
+1
+00:00:00,500 --> 00:00:04,412
+UbiGraph connects a conversation to a real drone mission.
+
+2
+00:00:08,800 --> 00:00:16,480
+The user describes a target and flight settings. Watch the Agent call its planning tools and generate a plan.
+
+3
+00:00:21,300 --> 00:00:26,868
+Next, connect only Crazyflie two. This establishes the link without taking off.
+
+4
+00:00:34,500 --> 00:00:41,244
+The connection result returns to the conversation. The selected aircraft is ready for an execution request.
+
+5
+00:00:44,100 --> 00:00:47,700
+The user now authorizes the reviewed physical mission.
+
+6
+00:00:54,800 --> 00:01:04,112
+The Agent selects a flight tool and submits the saved plan to the physical backend. The response is generated here,
+in the same conversation.
+
+7
+00:01:16,200 --> 00:01:24,936
+The page keeps recording while the aircraft flies. The conversation is on the left. Real flight and the reviewed
+route are on the right.
+
+8
+00:01:35,000 --> 00:01:42,920
+During the mission, the user asks for a final report. The Agent processes that request without starting another
+flight.
+
+9
+00:01:51,000 --> 00:01:58,584
+The physical recording continues at its original speed through the return and landing. The diagram shows the planned
+route.
+
+10
+00:02:13,300 --> 00:02:22,804
+Now watch the report generate. It identifies the physical backend and returns the final status, takeoff and landing
+checks, and landing telemetry.
+
+11
+00:02:33,300 --> 00:02:43,716
+The report also states what was verified: command sequence completion and landing. Target arrival was not verified,
+and no parking measurements were collected.
