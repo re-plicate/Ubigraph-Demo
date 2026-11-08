@@ -1,12 +1,22 @@
 # UbiGraph
 
-**Language-guided urban analytics and reviewed sensing missions.**
+**Connecting Observation Quality, Graph-Condensed Forecasting, and Reviewable Urban Sensing.**
 
-UbiGraph turns natural-language requests into data inspection, spatiotemporal forecasts, and reviewable collection plans. One LLM orchestrator coordinates specialist agents through typed tools; local services compute numerical results and track mission execution.
+UbiGraph connects natural-language requests to observation inspection, local spatiotemporal forecasting, and reviewed collection missions. One LLM orchestrates specialist tools; numerical services compute forecasts and mission services record execution.
 
-[Quick start](#quick-start) | [Usage guide](docs/USAGE.md) | [Data attribution](docs/USAGE.md#data-attribution)
+[Demo](#demo) | [Agent architecture](#agent-architecture) | [Research snapshot](#research-snapshot) | [Quick start](#quick-start) | [Documentation](docs/USAGE.md)
 
-## See the workflow
+![UbiGraph functional setting: user tasks, coordinated capabilities and configurable urban networks](docs/media/paper/functional-setting.png)
+
+**From observations to reviewed actions.** Inspect input quality, forecast future conditions, review proposed targets, and track execution. City networks, analytical tasks, and collection resources are configurable framework inputs; the packaged demo uses Aarhus parking replay and a three-drone simulator. Maps and routes in this figure are schematic.
+
+Three ideas connect the research and the system:
+
+- **Observation context.** Preserve missingness, data age, and the prediction cutoff when inspecting observations and recommending collection.
+- **Compact forecasting.** Condense historical windows offline while preserving observation masks and data age. Reference messages use outcomes available at the prediction cutoff; runtime loads frozen checkpoints.
+- **Reviewable coordination.** Use typed tools and explicit execution policy while keeping observations, computed forecasts, proposed plans, and action receipts distinct.
+
+## Demo
 
 https://github.com/user-attachments/assets/7e519ba6-0425-4a57-898c-e75e8f9925a8
 
@@ -17,6 +27,15 @@ https://github.com/user-attachments/assets/7e519ba6-0425-4a57-898c-e75e8f9925a8
 The recording uses a Crazyflie hardware bridge. This repository packages the urban-analysis workspace and three-drone simulation described below.
 
 <details>
+<summary>Physical prototype and hardware interface</summary>
+
+![UbiGraph physical prototype: analytical workspace, cflib bridge, Crazyradio PA and Crazyflie hardware trials](docs/media/paper/physical-prototype.png)
+
+The manuscript figure shows the analytical workspace, host computer, local cflib bridge, Crazyradio PA, and Crazyflie platforms, with frames from indoor and outdoor hardware trials. It illustrates the hardware pathway; the packaged public demo runs the simulator.
+
+</details>
+
+<details>
 <summary>Urban-analysis and simulation walkthrough (2:05)</summary>
 
 https://github.com/user-attachments/assets/713098c2-af6b-46cf-860e-aaaa38d2a6d0
@@ -25,17 +44,22 @@ Recorded on an earlier build. [Download the walkthrough](docs/media/ubigraph-ful
 
 </details>
 
-## How it works
+## Agent architecture
 
-![UbiGraph system design: workspace, LLM orchestration, specialist services and persistent evidence](docs/media/system-design.png)
+![UbiGraph Agent architecture: tool-call loop, shared registry and message bus, numerical services and mission services](docs/media/paper/agent-architecture.png)
 
-- **Tool-grounded analysis.** Data and spatial agents inspect historical observations and relationships. The temporal agent runs a pretrained local model; the LLM explains returned evidence.
-- **Review before execution.** Collection recommendations become structured plans and command manifests. The server checks execution policy and plan feasibility before dispatch.
-- **Traceable operation.** The browser streams tool progress and mission status. SQLite preserves conversation context, tool results, plan identifiers, and action receipts.
+**Activate, call, return, and continue.** The LLM chooses a registered tool; dispatch validates its inputs; the selected service returns a result or an explicit error to the orchestration loop. Core roles share an Agent Bus and reusable artifacts. Offline training prepares the historical bank and model, while runtime services handle prediction, mission execution, and persistent evidence.
 
-Specialist agents share an in-process bus and operate as executable service roles coordinated by the configured LLM.
+The illustrated agents denote software responsibilities coordinated by one configured LLM. Vision and profile transfer remain optional capabilities.
 
-## Explore the workspace
+| Implementation entry point | Responsibility |
+| --- | --- |
+| [Agent runtime](ubigraph_agent/runtime.py) and [shared hub](ubigraph_agent/hub.py) | Bounded tool calls, specialist dispatch, and streaming progress. |
+| [Forecast engine](ubigraph_agent/engine.py) and [included models](models/parking) | Historical context, local numerical predictions, and model evidence. |
+| [Mission planner](ubigraph_drone/planner.py) and [evidence store](ubigraph_agent/memory.py) | Fleet route planning, conversation context, and persistent tool and mission records. |
+
+<details>
+<summary>Workspace screenshots: forecasting and fleet execution</summary>
 
 <table>
 <tr>
@@ -47,6 +71,16 @@ Specialist agents share an in-process bus and operate as executable service role
 <td><b>Review and track.</b> Inspect planned routes and follow fleet execution, return and landing.</td>
 </tr>
 </table>
+
+</details>
+
+## Research snapshot
+
+![Paper-reported MAE and RMSE for persistence, ridge regression and the compact UbiGraph forecaster](docs/media/paper/forecast-results.png)
+
+**Primary parking forecast.** The forecaster uses a bank of **96 synchronized historical episodes** and is evaluated on **9,748 common garage-time labels** from six Aarhus garages. UbiGraph reports **MAE 11.229 ± 0.108 spaces**, a **22.4% reduction relative to persistence**. Ridge regression has lower RMSE, so average error and large-error behavior lead to different comparisons. The dots represent three seed fits on the same test cohort.
+
+The original plot and its data are preserved. [Exact metrics, protocol, and figure sources](docs/media/paper/README.md#forecasting-protocol) document this comparison. This repository focuses on the runnable interactive demo; the manuscript's broader training and transfer studies are separate.
 
 ## Quick start
 
@@ -96,3 +130,5 @@ The included instance replays **2014 Aarhus parking data for six garages**, prod
 The hardware recording reports command completion and verified landing. Target arrival was not verified; no parking measurements were collected. Vision requires local detection weights; the transfer module is experimental.
 
 [Configuration and workflows](docs/USAGE.md) | [Data sources](docs/USAGE.md#data-attribution) | [Regression checks](docs/USAGE.md#regression-checks)
+
+[Paper figure sources and captions](docs/media/paper/README.md)
