@@ -4,7 +4,7 @@
 
 UbiGraph connects natural-language requests to observation inspection, local spatiotemporal forecasting, and reviewed collection missions. One LLM orchestrates specialist tools; numerical services compute forecasts and mission services record execution.
 
-[Demo](#demo) | [Agent architecture](#agent-architecture) | [Research snapshot](#research-snapshot) | [Quick start](#quick-start) | [Documentation](docs/USAGE.md)
+[Demo](#demo) | [Agent architecture](#agent-architecture) | [Quick start](#quick-start) | [Documentation](docs/USAGE.md)
 
 ![UbiGraph functional setting: user tasks, coordinated capabilities and configurable urban networks](docs/media/paper/functional-setting.png)
 
@@ -74,13 +74,6 @@ The illustrated agents denote software responsibilities coordinated by one confi
 
 </details>
 
-## Research snapshot
-
-![Paper-reported MAE and RMSE for persistence, ridge regression and the compact UbiGraph forecaster](docs/media/paper/forecast-results.png)
-
-**Primary parking forecast.** The forecaster uses a bank of **96 synchronized historical episodes** and is evaluated on **9,748 common garage-time labels** from six Aarhus garages. UbiGraph reports **MAE 11.229 ± 0.108 spaces**, a **22.4% reduction relative to persistence**. Ridge regression has lower RMSE, so average error and large-error behavior lead to different comparisons. The dots represent three seed fits on the same test cohort.
-
-The original plot and its data are preserved. [Exact metrics, protocol, and figure sources](docs/media/paper/README.md#forecasting-protocol) document this comparison. This repository focuses on the runnable interactive demo; the manuscript's broader training and transfer studies are separate.
 
 ## Quick start
 
