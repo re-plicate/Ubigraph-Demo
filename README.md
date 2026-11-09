@@ -20,7 +20,7 @@ Three ideas connect the research and the system:
 
 https://github.com/user-attachments/assets/7f8be726-8f5a-4880-aa29-ddfd772617fc
 
-**Complete interactive workflow (2:40).** Explore the workspace and specialist Agents, generate forecasts, inspect spatial relationships and observation quality, review commands, run the three-drone simulator, and follow a separate physical-control demonstration through its final report. Recorded interactions are accelerated where useful; physical flight remains at its original speed. English female narration and subtitles.
+Explore the workspace and specialist Agents, generate forecasts, inspect spatial relationships and observation quality, review commands, run the three-drone simulator, and follow a separate physical-control demonstration through its final report. Recorded interactions are accelerated where useful; physical flight remains at its original speed. English female narration and subtitles.
 
 [Download 1080p video](docs/media/ubigraph-complete-demo-1080p.mp4) | [Subtitles](docs/media/ubigraph-complete-demo.srt)
 
