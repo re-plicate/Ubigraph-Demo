@@ -18,13 +18,22 @@ Three ideas connect the research and the system:
 
 ## Demo
 
+https://github.com/user-attachments/assets/7f8be726-8f5a-4880-aa29-ddfd772617fc
+
+**Complete interactive workflow (2:40).** Explore the workspace and specialist Agents, generate forecasts, inspect spatial relationships and observation quality, review commands, run the three-drone simulator, and follow a separate physical-control demonstration through its final report. Recorded interactions are accelerated where useful; physical flight remains at its original speed. English female narration and subtitles.
+
+[Download 1080p video](docs/media/ubigraph-complete-demo-1080p.mp4) | [Subtitles](docs/media/ubigraph-complete-demo.srt)
+
+The analytical and simulation workflows are available in this repository. The physical demonstration uses a separate Crazyflie hardware bridge. The combined video brings together recordings from these different settings.
+
+<details>
+<summary>Focused hardware-control workflow (2:49)</summary>
+
 https://github.com/user-attachments/assets/7e519ba6-0425-4a57-898c-e75e8f9925a8
 
-**Agent-to-drone control, from conversation to execution feedback (2:49).** A real control session showing task input, plan generation, tool calls, physical flight, and the final backend report. English female narration and subtitles; waiting periods are accelerated and physical footage plays at its original speed.
+The longer hardware-focused recording preserves additional conversation and report-reading time. [Download 1080p video](docs/media/ubigraph-agent-to-flight-1080p.mp4).
 
-[Download 1080p video](docs/media/ubigraph-agent-to-flight-1080p.mp4) | [Subtitles](docs/media/ubigraph-agent-to-flight.srt)
-
-The recording uses a Crazyflie hardware bridge. This repository packages the urban-analysis workspace and three-drone simulation described below.
+</details>
 
 <details>
 <summary>Physical prototype and hardware interface</summary>

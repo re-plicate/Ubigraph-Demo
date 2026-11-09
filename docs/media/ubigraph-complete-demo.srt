@@ -1,0 +1,74 @@
+1
+00:00:00,200 --> 00:00:05,816
+UbiGraph brings urban analysis and specialist Agents into one shared workspace.
+
+2
+00:00:06,750 --> 00:00:11,598
+A question calls the local forecast model and spatial analysis tools.
+
+3
+00:00:13,250 --> 00:00:16,370
+Explore the returned spatial relationships.
+
+4
+00:00:16,500 --> 00:00:22,164
+Inspect another replay time for missing observations and collection recommendations.
+
+5
+00:00:22,350 --> 00:00:27,078
+For simulation, the user supplies targets and reviews the plan.
+
+6
+00:00:28,600 --> 00:00:31,504
+Inspect the structured flight commands.
+
+7
+00:00:32,100 --> 00:00:40,668
+Execute the reviewed simulation. Routes and fleet state update as the mission runs. This replay is accelerated.
+
+8
+00:00:44,100 --> 00:00:47,316
+Review completed tasks and their action receipts.
+
+9
+00:00:48,100 --> 00:00:50,236
+Inspect model settings.
+
+10
+00:00:51,250 --> 00:00:58,978
+A separate physical demonstration follows the same interaction pattern. Start by previewing a mission in the
+conversation.
+
+11
+00:01:01,900 --> 00:01:07,468
+Connect the selected aircraft without takeoff, then inspect the connection result.
+
+12
+00:01:13,250 --> 00:01:17,114
+The user explicitly authorizes the saved physical mission.
+
+13
+00:01:18,600 --> 00:01:23,808
+The Agent calls the flight tool and generates its response in the conversation.
+
+14
+00:01:27,500 --> 00:01:35,852
+The conversation stays visible beside the aircraft footage and reviewed route. Physical flight is shown at its
+original speed.
+
+15
+00:01:48,100 --> 00:01:55,228
+While flight continues, the user asks the Agent for the final backend report, without starting another flight.
+
+16
+00:02:02,000 --> 00:02:07,904
+Watch the return and landing. The page keeps recording while the physical mission completes.
+
+17
+00:02:22,750 --> 00:02:31,726
+Finally, watch the report generate. It records command completion, takeoff and landing checks, and the limits of
+what was verified.
+
+18
+00:02:34,750 --> 00:02:39,646
+UbiGraph: analysis, reviewed action, and traceable results.
