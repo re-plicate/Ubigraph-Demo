@@ -26,6 +26,12 @@ Explore the workspace and specialist Agents, generate forecasts, inspect spatial
 
 The analytical and simulation workflows are available in this repository. The physical demonstration uses a separate Crazyflie hardware bridge. The combined video brings together recordings from these different settings.
 
+### Dual-drone physical demonstration
+
+https://github.com/user-attachments/assets/395cb7a0-d2fa-4b1f-91c0-ae58dc581900
+
+The controller scales planned travel distances to fit the demonstration area. This recording focuses on the workflow connecting the UbiGraph Agent framework, mission planning, and multi-drone control.
+
 <details>
 <summary>Focused hardware-control workflow (2:49)</summary>
 
@@ -129,7 +135,7 @@ Open **http://127.0.0.1:8765**. Press **Ctrl+C** in the serving terminal to stop
 
 The included instance replays **2014 Aarhus parking data for six garages**, produces **30-minute single-step forecasts**, and runs a **three-drone motion simulator**. Forecasts come from frozen checkpoints; conversations do not retrain the model. Simulated collection records actions with `measurement=null` and does not add measured parking observations.
 
-The hardware recording reports command completion and verified landing. Target arrival was not verified; no parking measurements were collected. Vision requires local detection weights; the transfer module is experimental.
+The single-drone recording reports command completion and verified landing. Target arrival was not verified; no parking measurements were collected. Vision requires local detection weights; the transfer module is experimental.
 
 [Configuration and workflows](docs/USAGE.md) | [Data sources](docs/USAGE.md#data-attribution) | [Regression checks](docs/USAGE.md#regression-checks)
 
