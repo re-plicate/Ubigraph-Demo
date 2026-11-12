@@ -20,9 +20,12 @@ Three ideas connect the research and the system:
 
 https://github.com/user-attachments/assets/7f8be726-8f5a-4880-aa29-ddfd772617fc
 
+<!-- Relative-file player for anonymous mirrors; GitHub uses the attachment player above. -->
+<video src="docs/media/ubigraph-complete-demo-1080p.mp4" controls width="100%" title="Complete UbiGraph workflow"></video>
+
 Explore the workspace and specialist Agents, generate forecasts, inspect spatial relationships and observation quality, review commands, run the three-drone simulator, and follow a separate physical-control demonstration through its final report. Recorded interactions are accelerated where useful; physical flight remains at its original speed. English female narration and subtitles.
 
-[Download 1080p video](docs/media/ubigraph-complete-demo-1080p.mp4) | [Subtitles](docs/media/ubigraph-complete-demo.srt)
+<a href="docs/media/ubigraph-complete-demo-1080p.mp4">Download 1080p video</a> | [Subtitles](docs/media/ubigraph-complete-demo.srt)
 
 The analytical and simulation workflows are available in this repository. The physical demonstration uses a separate Crazyflie hardware bridge. The combined video brings together recordings from these different settings.
 
@@ -30,14 +33,22 @@ The analytical and simulation workflows are available in this repository. The ph
 
 https://github.com/user-attachments/assets/395cb7a0-d2fa-4b1f-91c0-ae58dc581900
 
+<!-- Relative-file player for anonymous mirrors; GitHub uses the attachment player above. -->
+<video src="docs/media/ubigraph-dual-drone-original.mp4" controls width="100%" title="UbiGraph dual-drone physical demonstration"></video>
+
 The controller scales planned travel distances to fit the demonstration area. This recording focuses on the workflow connecting the UbiGraph Agent framework, mission planning, and multi-drone control.
+
+<a href="docs/media/ubigraph-dual-drone-original.mp4">Watch or download the original 1080p recording (100 MB)</a>. The original file is preserved without re-encoding.
 
 <details>
 <summary>Focused hardware-control workflow (2:49)</summary>
 
 https://github.com/user-attachments/assets/7e519ba6-0425-4a57-898c-e75e8f9925a8
 
-The longer hardware-focused recording preserves additional conversation and report-reading time. [Download 1080p video](docs/media/ubigraph-agent-to-flight-1080p.mp4).
+<!-- Relative-file player for anonymous mirrors; GitHub uses the attachment player above. -->
+<video src="docs/media/ubigraph-agent-to-flight-1080p.mp4" controls width="100%" title="UbiGraph hardware-control workflow"></video>
+
+The longer hardware-focused recording preserves additional conversation and report-reading time. <a href="docs/media/ubigraph-agent-to-flight-1080p.mp4">Download 1080p video</a>.
 
 </details>
 
@@ -55,7 +66,10 @@ The manuscript figure shows the analytical workspace, host computer, local cflib
 
 https://github.com/user-attachments/assets/713098c2-af6b-46cf-860e-aaaa38d2a6d0
 
-Recorded on an earlier build. [Download the walkthrough](docs/media/ubigraph-full-walkthrough.mp4).
+<!-- Relative-file player for anonymous mirrors; GitHub uses the attachment player above. -->
+<video src="docs/media/ubigraph-full-walkthrough.mp4" controls width="100%" title="UbiGraph analysis and simulation walkthrough"></video>
+
+Recorded on an earlier build. <a href="docs/media/ubigraph-full-walkthrough.mp4">Download the walkthrough</a>.
 
 </details>
 
